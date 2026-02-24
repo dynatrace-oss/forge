@@ -1,0 +1,46 @@
+metadata:
+  name: dependency_optimization
+  version: 2.0.0
+  description: Optimize dependency configuration
+  category: dependency
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - dependency
+placeholders:
+  required:
+  - dependencies_list
+  - package_name
+  - package_version
+  optional: []
+template: 'Optimize the following Maven dependencies for package {{ package_name }}
+  version {{ package_version }}:
+
+
+  Current dependencies:
+
+  {{ dependencies_list }}
+
+
+  Please provide optimized dependencies by:
+
+  1. Removing unnecessary or conflicting versions
+
+  2. Ensuring compatibility with {{ package_name }}
+
+  3. Minimizing the dependency tree
+
+  4. Removing transitive dependencies that are already included
+
+  5. Choosing stable, well-maintained versions
+
+
+  Return only the essential dependencies in the same format (group_id:artifact_id:version),
+  one per line, with a dash prefix:
+
+  - group_id:artifact_id:version
+
+
+  Focus on maintaining functionality while reducing complexity and potential security
+  vulnerabilities.'
+examples: []

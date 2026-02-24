@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "gyros"
+version = "0.1.0"
+description = "Blueprint management system for auto-exploitation framework"
+authors = ["Shaikh, Farooq <farooq.shaikh@dynatrace.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+llama-index = "^0.14.7"
+aiohttp = "^3.11.18"
+aiofiles = "^24.1.0"
+pyyaml = "^6.0.2"
+python-dotenv = "^1.1.0"
+asyncio = "^3.4.3"
+typing-extensions = "^4.13.2"
+llama-index-llms-azure-openai = "^0.4.2"
+mkdocs = "^1.6.1"
+mkdocs-techdocs-core = "^1.5.4"
+aioconsole = "^0.8.1"
+jsonschema = "^4.25.1"
+psutil = "^6.1.0"
+jinja2 = "^3.1.6"
+boto3 = "^1.35.0"
+llama-index-core = "^0.14.7"
+pycryptodome = "^3.23.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.24.0"
+pytest-cov = "^6.0.0"
+ruff = "^0.13.1"
+matplotlib = "^3.10.8"
+seaborn = "^0.13.2"
+openpyxl = "^3.1.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+typeCheckingMode = "off" # off, basic, standard, strict
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = ["I"]
+ignore = ["E731"]

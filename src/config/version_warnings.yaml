@@ -1,0 +1,146 @@
+metadata:
+  name: version_warnings
+  version: 2.0.0
+  description: Version-specific warnings for breaking API changes
+  author: FORGE Framework
+  last_updated: '2025-11-03'
+packages:
+  struts:
+    package_patterns:
+    - org.apache.struts
+    - struts2-core
+    - struts-core
+    major_versions:
+      '6':
+        severity: CRITICAL
+        warning: "STRUTS 6.x DETECTED - CRITICAL API CHANGES:\n   - HttpParameters\
+          \ is IMMUTABLE (not Map<String, Object>)\n   - Use httpParameters.get(\"\
+          key\").getValue() NOT httpParameters.get(\"key\")\n   - UploadedFile interface\
+          \ (NOT File class)\n   - Use uploadedFile.getContent() for InputStream\n\
+          \   - Action extends ActionSupport (same as 2.x)\n   - See version guidance\
+          \ for complete Struts 6.x API rules\n   - MANDATORY: Re-read version rules\
+          \ before code generation!\n"
+        api_changes:
+        - HttpParameters is immutable collection
+        - UploadedFile replaces File for file uploads
+        - New parameter binding model
+        - Method signatures changed in ActionSupport
+        migration_notes:
+        - Update all parameter access to use HttpParameters API
+        - Replace File with UploadedFile in file upload actions
+        - Test parameter binding thoroughly
+      '2':
+        severity: INFO
+        info: Struts 2.x uses traditional APIs (Map for parameters, File for uploads)
+      '5':
+        severity: INFO
+        info: Struts 2.5.x uses traditional APIs with security enhancements
+  springframework:
+    package_patterns:
+    - org.springframework
+    - spring-core
+    - spring-web
+    - spring-boot
+    major_versions:
+      '6':
+        severity: CRITICAL
+        warning: "SPRING 6.x DETECTED - CRITICAL API CHANGES:\n   - jakarta.* namespace\
+          \ (NOT javax.*)\n   - Import jakarta.servlet.*, jakarta.persistence.*, etc.\n\
+          \   - Requires Java 17 or higher\n   - Some deprecated APIs removed\n  \
+          \ - See version guidance for migration details\n   - MANDATORY: Use jakarta.*\
+          \ imports throughout!\n"
+        api_changes:
+        - jakarta.* namespace replaces javax.*
+        - Java 17+ required
+        - Deprecated methods removed
+        - New virtual threads support
+        migration_notes:
+        - Replace all javax.* imports with jakarta.*
+        - Update Java version to 17+
+        - Review deprecated API usage
+      '5':
+        severity: INFO
+        info: Spring 5.x uses javax.* namespace, Java 8+
+      '3':
+        severity: INFO
+        info: Spring 3.x legacy version, consider upgrading
+  jakarta:
+    package_patterns:
+    - jakarta.servlet
+    - jakarta.persistence
+    - jakarta.ws.rs
+    major_versions:
+      '9':
+        severity: INFO
+        info: Jakarta EE 9 introduced namespace change from javax.* to jakarta.*
+      '10':
+        severity: INFO
+        info: Jakarta EE 10 with Java 11+ requirement
+  micronaut:
+    package_patterns:
+    - io.micronaut
+    major_versions:
+      '4':
+        severity: WARNING
+        warning: "MICRONAUT 4.x - API CHANGES:\n   - New HTTP client API\n   - Updated\
+          \ dependency injection\n   - Java 17+ recommended\n"
+        api_changes:
+        - HTTP client API refactored
+        - Dependency injection improvements
+      '3':
+        severity: INFO
+        info: Micronaut 3.x stable version with Java 8+ support
+  quarkus:
+    package_patterns:
+    - io.quarkus
+    - quarkus-
+    major_versions:
+      '3':
+        severity: WARNING
+        warning: "QUARKUS 3.x - JAKARTA NAMESPACE:\n   - Uses jakarta.* imports (not\
+          \ javax.*)\n   - Java 11+ required\n   - Some extensions updated\n"
+        api_changes:
+        - Jakarta EE 10
+        - Java 11+ required
+      '2':
+        severity: INFO
+        info: Quarkus 2.x uses javax.* namespace
+  jackson:
+    package_patterns:
+    - com.fasterxml.jackson
+    major_versions:
+      '2':
+        severity: INFO
+        info: Jackson 2.x current stable version, extensive API
+  hibernate:
+    package_patterns:
+    - org.hibernate
+    major_versions:
+      '6':
+        severity: WARNING
+        warning: "HIBERNATE 6.x - MAJOR CHANGES:\n   - Jakarta EE (jakarta.* not javax.*)\n\
+          \   - New query API\n   - Java 11+ required\n"
+        api_changes:
+        - Jakarta Persistence API
+        - Query API redesign
+      '5':
+        severity: INFO
+        info: Hibernate 5.x uses javax.persistence.*
+  jenkins:
+    package_patterns:
+    - org.jenkins-ci
+    - jenkins
+    major_versions:
+      '2':
+        severity: INFO
+        info: Jenkins 2.x LTS, use plugin development guidelines
+global_warnings:
+  security:
+  - Always validate and sanitize user input
+  - Use parameterized queries to prevent SQL injection
+  - Implement proper authentication and authorization
+  - Keep dependencies up to date
+  compatibility:
+  - Test with the exact version specified in CVE
+  - API behavior may differ between minor versions
+  - Check deprecation warnings in documentation

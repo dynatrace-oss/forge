@@ -1,0 +1,83 @@
+# Spring Boot application configuration for protocol servers
+# Framework-agnostic config supporting Undertow, Netty, Jetty, Reactor
+
+server:
+  port: {{ server_port | default(8080) }}
+
+  # Server engine configuration (auto-detected by Spring Boot)
+  # Works with undertow, netty, jetty, tomcat
+
+  # Connection settings
+  max-http-header-size: {{ max_http_header_size | default("8KB") }}
+  connection-timeout: {{ connection_timeout | default("60s") }}
+
+  # Thread pool settings
+  tomcat:
+    threads:
+      max: {{ max_threads | default(200) }}
+      min-spare: {{ min_spare_threads | default(10) }}
+    max-connections: {{ max_connections | default(8192) }}
+    accept-count: {{ accept_count | default(100) }}
+
+  undertow:
+    threads:
+      io: {{ io_threads | default(4) }}
+      worker: {{ worker_threads | default(200) }}
+    buffer-size: {{ buffer_size | default(16384) }}
+    direct-buffers: {{ direct_buffers | default(true) }}
+    max-http-post-size: {{ max_http_post_size | default("-1") }}
+
+  netty:
+    connection-timeout: {{ netty_connection_timeout | default("60s") }}
+
+  # HTTP/2 configuration (if applicable)
+  http2:
+    enabled: {{ http2_enabled | default(false) }}
+
+# Protocol-specific settings
+protocol:
+  type: {{ protocol_type | default("http") }}
+
+  # Resource limits
+  limits:
+    max-connections: {{ protocol_max_connections | default("unlimited") }}
+    max-streams: {{ max_streams | default("unlimited") }}
+    max-frame-size: {{ max_frame_size | default("16777215") }}
+    max-header-list-size: {{ max_header_list_size | default("8192") }}
+
+  # Connection lifecycle
+  connection:
+    auto-close: {{ auto_close_connections | default(true) }}
+    idle-timeout: {{ idle_timeout | default("300s") }}
+    keep-alive: {{ keep_alive | default(true) }}
+
+  # WebSocket settings (if applicable)
+  websocket:
+    enabled: {{ websocket_enabled | default(false) }}
+    max-frame-payload-length: {{ ws_max_frame_size | default("65536") }}
+    max-text-message-buffer-size: {{ ws_max_text_buffer | default("65536") }}
+    max-binary-message-buffer-size: {{ ws_max_binary_buffer | default("65536") }}
+    allow-extensions: {{ ws_allow_extensions | default(true) }}
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    io.undertow: {{ undertow_log_level | default("INFO") }}
+    io.netty: {{ netty_log_level | default("INFO") }}
+    org.eclipse.jetty: {{ jetty_log_level | default("INFO") }}
+    reactor.netty: {{ reactor_log_level | default("INFO") }}
+
+# Vulnerability-specific configuration
+vulnerability:
+  cve-id: {{ cve_id }}
+  config-explanation: {{ vulnerability_config_explanation | default("Default secure configuration") }}
+
+# NOTES FOR LLM:
+# - Set max_connections to "unlimited" or very high value for connection exhaustion CVEs
+# - Set auto_close_connections to false for connection leak CVEs
+# - Set max_streams to "unlimited" for HTTP/2 stream exhaustion CVEs
+# - Set max_frame_size to maximum (16777215) for frame size vulnerabilities
+# - Set http2_enabled to true for HTTP/2 protocol CVEs
+# - Set websocket_enabled to true for WebSocket protocol CVEs
+# - Include vulnerability_config_explanation describing WHY these values trigger the CVE

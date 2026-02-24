@@ -1,0 +1,181 @@
+# Framework Requirements Configuration
+#
+# This file defines framework-specific requirements for code adaptation.
+# Used by LLMContextBuilder to provide framework-specific guidance to LLMs.
+
+frameworks:
+  SPRING_BOOT:
+    name: "Spring Boot"
+    description: "Modern Java framework with embedded server and auto-configuration"
+    requirements: |
+      - Use @SpringBootApplication annotation for main class
+      - Create @RestController for web endpoints
+      - Use @PostMapping/@GetMapping for HTTP endpoints
+      - Add spring-boot-starter-web dependency
+      - Configure application.properties for server settings
+      - Use dependency injection with @Autowired
+      - Main class should extend SpringBootApplication pattern
+    dependencies:
+      - "spring-boot-starter-web"
+      - "spring-boot-starter"
+    annotations:
+      - "@SpringBootApplication"
+      - "@RestController"
+      - "@PostMapping"
+      - "@GetMapping"
+      - "@Autowired"
+      - "@RequestBody"
+      - "@PathVariable"
+    configuration_files:
+      - "application.properties"
+      - "application.yml"
+    typical_ports:
+      - 8080
+      - 8085
+
+  APACHE_STRUTS:
+    name: "Apache Struts"
+    description: "MVC framework for Java web applications"
+    requirements: |
+      - Create Action classes extending ActionSupport
+      - Use @Action annotation for action methods
+      - Configure struts.xml for action mappings
+      - Add struts2-core and struts2-convention-plugin dependencies
+      - Use Result types for view rendering
+      - Configure web.xml for Struts filter
+      - Follow convention-based configuration
+    critical_warnings: |
+      **CRITICAL - DO NOT create configuration files:**
+      - DO NOT create struts.xml - it will be injected automatically from templates
+      - DO NOT create web.xml - it will be injected automatically from templates
+      - The template system handles all framework configuration files
+    dependencies:
+      - "struts2-core"
+      - "struts2-convention-plugin"
+      - "struts2-config-browser-plugin"
+    annotations:
+      - "@Action"
+      - "@Result"
+      - "@Namespace"
+    configuration_files:
+      - "struts.xml"
+      - "web.xml"
+    typical_ports:
+      - 8080
+
+  MICRONAUT:
+    name: "Micronaut"
+    description: "Modern, JVM-based framework with compile-time dependency injection"
+    requirements: |
+      - Use @Application annotation for main class
+      - Create @Controller for web endpoints
+      - Use @Get/@Post annotations for HTTP endpoints
+      - Add micronaut-http and micronaut-http-server-netty dependencies
+      - Configure application.yml for server settings
+      - Use compile-time dependency injection
+      - Main class should be an Application
+    dependencies:
+      - "micronaut-http"
+      - "micronaut-http-server-netty"
+      - "micronaut-inject"
+    annotations:
+      - "@Application"
+      - "@Controller"
+      - "@Get"
+      - "@Post"
+      - "@Inject"
+      - "@Body"
+    configuration_files:
+      - "application.yml"
+      - "application.properties"
+    typical_ports:
+      - 8080
+
+  QUARKUS:
+    name: "Quarkus"
+    description: "Kubernetes-native Java framework optimized for GraalVM and HotSpot"
+    requirements: |
+      - Use @Path annotation for REST endpoints
+      - Create JAX-RS resource classes
+      - Use @GET/@POST annotations for HTTP methods
+      - Add quarkus-resteasy and quarkus-arc dependencies
+      - Configure application.properties for settings
+      - Use CDI for dependency injection
+      - Main class can be a standard main method
+    dependencies:
+      - "quarkus-resteasy"
+      - "quarkus-arc"
+      - "quarkus-resteasy-jsonb"
+    annotations:
+      - "@Path"
+      - "@GET"
+      - "@POST"
+      - "@Inject"
+      - "@Consumes"
+      - "@Produces"
+    configuration_files:
+      - "application.properties"
+    typical_ports:
+      - 8080
+
+  WEB_APPLICATION:
+    name: "Generic Web Application"
+    description: "Generic web application (defaults to Spring Boot)"
+    requirements: |
+      - Create Spring Boot web application with @SpringBootApplication
+      - Add @RestController for HTTP endpoints
+      - Include endpoints like /api/vulnerable, /api/parse, /api/exploit
+      - Run on port 8080 for HTTP accessibility
+      - Focus on HTTP-based vulnerability demonstration
+    dependencies:
+      - "spring-boot-starter-web"
+    annotations:
+      - "@SpringBootApplication"
+      - "@RestController"
+      - "@PostMapping"
+      - "@GetMapping"
+    configuration_files:
+      - "application.properties"
+    typical_ports:
+      - 8080
+
+  JENKINS:
+    name: "Jenkins"
+    description: "Automation server with plugin system"
+    requirements: |
+      - Create Jenkins plugin structure
+      - Extend appropriate Jenkins base classes
+      - Use @Extension annotation for extension points
+      - Configure plugin descriptor (pom.xml with hpi packaging)
+      - Implement Describable pattern for configuration
+      - Use Stapler for web UI bindings
+    dependencies:
+      - "jenkins-core"
+      - "jenkins-war"
+    annotations:
+      - "@Extension"
+      - "@DataBoundConstructor"
+    configuration_files:
+      - "pom.xml"
+    typical_ports:
+      - 8080
+      - 8081
+
+  STANDALONE:
+    name: "Standalone Application"
+    description: "Standalone Java application (command-line or desktop)"
+    requirements: |
+      - Create standard Java application with main method
+      - No web framework annotations needed
+      - Use appropriate libraries for functionality
+      - Package as executable JAR if needed
+      - Focus on demonstrating vulnerability in standalone context
+    dependencies: []
+    annotations: []
+    configuration_files:
+      - "application.properties"
+    typical_ports: []
+    notes: |
+      Note: Standalone applications are less suitable for HTTP-based
+      vulnerability demonstrations. Consider using WEB_APPLICATION instead
+      for better testability.

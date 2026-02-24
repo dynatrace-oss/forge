@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Universal Web Template for HTTP-Based Vulnerability Demonstrations
+    
+    This template is used for ALL vulnerability types in the FORGE framework.
+    All vulnerabilities are demonstrated through Spring Boot web applications
+    with HTTP endpoints, regardless of the original vulnerability type.
+    
+    Features:
+    - HTTP endpoint access for all vulnerabilities
+    - Spring Boot web framework for consistent container lifecycle
+    - Port 8080 accessibility for validation and testing
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>{{ spring_boot_version }}</version>
+        <relativePath/>
+    </parent>
+
+    <!-- Use org.cve-emulator groupId to avoid conflict with vulnerable package -->
+    <groupId>org.cve-emulator</groupId>
+    <artifactId>{{ artifact_id }}-web-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>{{ java_version }}</maven.compiler.source>
+        <maven.compiler.target>{{ java_version }}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- Dynamic repositories -->
+    {{ repositories }}
+
+    <dependencies>
+        <!-- Spring Boot web starter for HTTP endpoints -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Vulnerable dependency - automatically populated -->
+        <dependency>
+            <groupId>{{ group_id }}</groupId>
+            <artifactId>{{ artifact_id }}</artifactId>
+            <version>{{ package_version }}</version>
+        </dependency>
+
+        <!-- Additional dependencies - automatically detected -->
+        {{ dependencies }}
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

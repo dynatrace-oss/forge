@@ -1,0 +1,524 @@
+# This file contains framework-specific configurations, mappings, and settings
+# for the LLM-driven framework adaptation system.
+
+# Framework Detection Configuration
+framework_detection:
+  # Confidence thresholds for framework detection
+  confidence_thresholds:
+    high_confidence: 0.8
+    medium_confidence: 0.6
+    low_confidence: 0.4
+    minimum_threshold: 0.3
+  
+  # Framework detection patterns for dependency analysis
+  dependency_patterns:
+    spring_boot:
+      - "org.springframework.boot"
+      - "spring-boot-starter"
+      - "spring-boot-autoconfigure"
+    apache_struts:
+      - "org.apache.struts"
+      - "struts2-core"
+      - "struts2-convention-plugin"
+    micronaut:
+      - "io.micronaut"
+      - "micronaut-http"
+      - "micronaut-inject"
+    quarkus:
+      - "io.quarkus"
+      - "quarkus-resteasy"
+      - "quarkus-arc"
+  
+  # Package namespace analysis patterns
+  namespace_patterns:
+    spring_boot:
+      - "org.springframework"
+      - "com.springframework"
+    apache_struts:
+      - "org.apache.struts"
+      - "com.opensymphony"
+    micronaut:
+      - "io.micronaut"
+    quarkus:
+      - "io.quarkus"
+
+# Framework-Specific Configurations
+frameworks:
+  spring_boot:
+    name: "Spring Boot"
+    description: "Framework for creating stand-alone, production-grade Spring applications"
+    template_mapping: "spring_boot_web"
+    default_port: 8080
+    packaging_type: "jar"
+    
+    # Required dependencies
+    core_dependencies:
+      - group_id: "org.springframework.boot"
+        artifact_id: "spring-boot-starter"
+        version_range: "[2.0.0,3.0.0)"
+      - group_id: "org.springframework.boot"
+        artifact_id: "spring-boot-starter-web"
+        version_range: "[2.0.0,3.0.0)"
+    
+    # Build plugins
+    build_plugins:
+      - group_id: "org.springframework.boot"
+        artifact_id: "spring-boot-maven-plugin"
+        version: "2.7.0"
+    
+    # Framework-specific properties
+    properties:
+      java_version: "11"
+      spring_boot_version: "2.7.0"
+      maven_compiler_source: "11"
+      maven_compiler_target: "11"
+    
+    # Configuration files
+    config_files:
+      - "application.properties"
+      - "application.yml"
+    
+    # Framework capabilities
+    capabilities:
+      - "embedded-server"
+      - "auto-configuration"
+      - "actuator"
+      - "web-mvc"
+    
+    # Vulnerability type suitability
+    vulnerability_suitability:
+      deserialization: "excellent"
+      web_vulnerability: "excellent"
+      injection: "excellent"
+      library_vulnerability: "good"
+
+  apache_struts:
+    name: "Apache Struts"
+    description: "Framework for developing Java web applications"
+    template_mapping: "servlet_container"
+    default_port: 8080
+    packaging_type: "war"
+    
+    # Required dependencies
+    core_dependencies:
+      - group_id: "org.apache.struts"
+        artifact_id: "struts2-core"
+        version_range: "[2.0.0,6.0.0)"
+      - group_id: "org.apache.struts"
+        artifact_id: "struts2-convention-plugin"
+        version_range: "[2.0.0,6.0.0)"
+    
+    # Build plugins
+    build_plugins:
+      - group_id: "org.apache.maven.plugins"
+        artifact_id: "maven-war-plugin"
+        version: "3.2.3"
+    
+    # Framework-specific properties
+    properties:
+      java_version: "8"
+      maven_compiler_source: "8"
+      maven_compiler_target: "8"
+      failOnMissingWebXml: "false"
+    
+    # Configuration files
+    config_files:
+      - "struts.xml"
+      - "web.xml"
+    
+    # Framework capabilities
+    capabilities:
+      - "action-based"
+      - "interceptors"
+      - "result-types"
+      - "web-mvc"
+    
+    # Vulnerability type suitability
+    vulnerability_suitability:
+      deserialization: "excellent"
+      web_vulnerability: "excellent"
+      injection: "excellent"
+      library_vulnerability: "fair"
+
+  micronaut:
+    name: "Micronaut"
+    description: "Modern, JVM-based framework for building modular microservices"
+    template_mapping: "microservice_native"
+    default_port: 8080
+    packaging_type: "jar"
+    
+    # Required dependencies
+    core_dependencies:
+      - group_id: "io.micronaut"
+        artifact_id: "micronaut-http"
+        version_range: "[3.0.0,4.0.0)"
+      - group_id: "io.micronaut"
+        artifact_id: "micronaut-http-server-netty"
+        version_range: "[3.0.0,4.0.0)"
+    
+    # Build plugins
+    build_plugins:
+      - group_id: "io.micronaut.build"
+        artifact_id: "micronaut-maven-plugin"
+        version: "3.2.0"
+    
+    # Framework-specific properties
+    properties:
+      java_version: "11"
+      micronaut_version: "3.7.0"
+      maven_compiler_source: "11"
+      maven_compiler_target: "11"
+    
+    # Configuration files
+    config_files:
+      - "application.yml"
+      - "application.properties"
+    
+    # Framework capabilities
+    capabilities:
+      - "reactive"
+      - "compile-time-di"
+      - "native-image"
+      - "microservices"
+    
+    # Vulnerability type suitability
+    vulnerability_suitability:
+      deserialization: "good"
+      web_vulnerability: "good"
+      injection: "good"
+      library_vulnerability: "good"
+
+  quarkus:
+    name: "Quarkus"
+    description: "Kubernetes Native Java stack for fast startup and low memory footprint"
+    template_mapping: "microservice_native"
+    default_port: 8080
+    packaging_type: "jar"
+    
+    # Required dependencies
+    core_dependencies:
+      - group_id: "io.quarkus"
+        artifact_id: "quarkus-resteasy"
+        version_range: "[2.0.0,3.0.0)"
+      - group_id: "io.quarkus"
+        artifact_id: "quarkus-arc"
+        version_range: "[2.0.0,3.0.0)"
+    
+    # Build plugins
+    build_plugins:
+      - group_id: "io.quarkus"
+        artifact_id: "quarkus-maven-plugin"
+        version: "2.12.0"
+    
+    # Framework-specific properties
+    properties:
+      java_version: "11"
+      quarkus_version: "2.12.0"
+      maven_compiler_source: "11"
+      maven_compiler_target: "11"
+    
+    # Configuration files
+    config_files:
+      - "application.properties"
+    
+    # Framework capabilities
+    capabilities:
+      - "native-compilation"
+      - "fast-startup"
+      - "low-memory"
+      - "cloud-native"
+    
+    # Vulnerability type suitability
+    vulnerability_suitability:
+      deserialization: "good"
+      web_vulnerability: "good"
+      injection: "good"
+      library_vulnerability: "good"
+
+  standalone_jar:
+    name: "Standalone JAR"
+    description: "Simple Java application with minimal dependencies"
+    template_mapping: "standalone_jar"
+    default_port: null
+    packaging_type: "jar"
+    
+    # Required dependencies (minimal)
+    core_dependencies:
+      - group_id: "org.slf4j"
+        artifact_id: "slf4j-simple"
+        version: "1.7.36"
+    
+    # Build plugins
+    build_plugins:
+      - group_id: "org.apache.maven.plugins"
+        artifact_id: "maven-compiler-plugin"
+        version: "3.11.0"
+    
+    # Framework-specific properties
+    properties:
+      java_version: "11"
+      maven_compiler_source: "11"
+      maven_compiler_target: "11"
+    
+    # Configuration files
+    config_files: []
+    
+    # Framework capabilities
+    capabilities:
+      - "standalone"
+      - "minimal"
+    
+    # Vulnerability type suitability
+    vulnerability_suitability:
+      deserialization: "fair"
+      web_vulnerability: "poor"
+      injection: "fair"
+      library_vulnerability: "excellent"
+
+  # Protocol-Level Server Configurations
+  spring_boot_remoting:
+    name: "Spring Boot with Remoting Protocol"
+    description: "Undertow server with wildfly-http-client remoting protocol support for protocol-level vulnerabilities"
+    template_mapping: "remoting_protocol_server"
+    default_port: 8080
+    packaging_type: "jar"
+
+    core_dependencies:
+      - group_id: "io.undertow"
+        artifact_id: "undertow-core"
+        version_range: "[2.0.0,3.0.0)"
+      - group_id: "org.wildfly.httpclient"
+        artifact_id: "wildfly-http-client-common"
+        version_range: "[1.0.0,2.0.0)"
+      - group_id: "org.jboss.xnio"
+        artifact_id: "xnio-api"
+        version_range: "[3.0.0,4.0.0)"
+
+    build_plugins:
+      - group_id: "org.apache.maven.plugins"
+        artifact_id: "maven-shade-plugin"
+        version: "3.5.0"
+        configuration:
+          transformers:
+            - transformer: "ManifestResourceTransformer"
+
+    properties:
+      java_version: "11"
+      maven_compiler_source: "11"
+      maven_compiler_target: "11"
+      project_build_sourceEncoding: "UTF-8"
+
+    config_files: []
+
+    capabilities:
+      - "protocol-server"
+      - "remoting-protocol"
+      - "connection-lifecycle"
+      - "wildfly-http-client"
+
+    vulnerability_suitability:
+      protocol_level: "excellent"
+      connection_leak: "excellent"
+      web_vulnerability: "poor"
+      injection: "poor"
+      library_vulnerability: "fair"
+
+  undertow_http2:
+    name: "Undertow HTTP/2 Server"
+    description: "Undertow server with HTTP/2 protocol support for HTTP/2-specific vulnerabilities"
+    template_mapping: "http2_server"
+    default_port: 8080
+    packaging_type: "jar"
+
+    core_dependencies:
+      - group_id: "io.undertow"
+        artifact_id: "undertow-core"
+        version_range: "[2.0.0,3.0.0)"
+      - group_id: "org.eclipse.jetty.alpn"
+        artifact_id: "alpn-api"
+        version_range: "[1.0.0,2.0.0)"
+      - group_id: "org.jboss.xnio"
+        artifact_id: "xnio-api"
+        version_range: "[3.0.0,4.0.0)"
+
+    build_plugins:
+      - group_id: "org.apache.maven.plugins"
+        artifact_id: "maven-shade-plugin"
+        version: "3.5.0"
+        configuration:
+          transformers:
+            - transformer: "ManifestResourceTransformer"
+
+    properties:
+      java_version: "11"
+      maven_compiler_source: "11"
+      maven_compiler_target: "11"
+      project_build_sourceEncoding: "UTF-8"
+
+    config_files: []
+
+    capabilities:
+      - "protocol-server"
+      - "http2-protocol"
+      - "alpn-negotiation"
+      - "stream-processing"
+      - "http2-frames"
+
+    vulnerability_suitability:
+      protocol_level: "excellent"
+      http2_stream_abuse: "excellent"
+      web_vulnerability: "poor"
+      injection: "poor"
+      library_vulnerability: "fair"
+
+  undertow_websocket:
+    name: "Undertow WebSocket Server"
+    description: "Undertow server with WebSocket protocol support for WebSocket-specific vulnerabilities"
+    template_mapping: "websocket_server"
+    default_port: 8080
+    packaging_type: "jar"
+
+    core_dependencies:
+      - group_id: "io.undertow"
+        artifact_id: "undertow-core"
+        version_range: "[2.0.0,3.0.0)"
+      - group_id: "io.undertow"
+        artifact_id: "undertow-websockets-jsr"
+        version_range: "[2.0.0,3.0.0)"
+      - group_id: "javax.websocket"
+        artifact_id: "javax.websocket-api"
+        version: "1.1"
+      - group_id: "org.jboss.xnio"
+        artifact_id: "xnio-api"
+        version_range: "[3.0.0,4.0.0)"
+
+    build_plugins:
+      - group_id: "org.apache.maven.plugins"
+        artifact_id: "maven-shade-plugin"
+        version: "3.5.0"
+        configuration:
+          transformers:
+            - transformer: "ManifestResourceTransformer"
+
+    properties:
+      java_version: "11"
+      maven_compiler_source: "11"
+      maven_compiler_target: "11"
+      project_build_sourceEncoding: "UTF-8"
+
+    config_files: []
+
+    capabilities:
+      - "protocol-server"
+      - "websocket-protocol"
+      - "upgrade-handling"
+      - "frame-processing"
+      - "websocket-endpoint"
+
+    vulnerability_suitability:
+      protocol_level: "excellent"
+      websocket_vulnerability: "excellent"
+      web_vulnerability: "poor"
+      injection: "poor"
+      library_vulnerability: "fair"
+
+# Template Customization Settings
+template_customization:
+  # Enable/disable LLM-driven customization
+  enabled: true
+  
+  # Caching settings
+  caching:
+    enabled: true
+    ttl_hours: 24
+    max_cache_size: 100
+  
+  # LLM settings for customization
+  llm_settings:
+    timeout_seconds: 30
+    max_retries: 2
+    temperature: 0.1
+    max_tokens: 2000
+  
+  # Template optimization settings
+  optimization:
+    remove_duplicate_dependencies: true
+    optimize_build_plugins: true
+    validate_xml_structure: true
+    enforce_security_best_practices: true
+
+# Adaptation Strategy Configuration
+adaptation_strategies:
+  wrap_standalone:
+    description: "Wrap standalone code in framework structure"
+    complexity: "simple"
+    supported_frameworks: ["spring_boot", "micronaut", "quarkus"]
+  
+  convert_to_web:
+    description: "Convert to web application pattern"
+    complexity: "moderate"
+    supported_frameworks: ["spring_boot", "apache_struts"]
+  
+  convert_framework:
+    description: "Convert between framework types"
+    complexity: "complex"
+    supported_frameworks: ["spring_boot", "apache_struts", "micronaut", "quarkus"]
+  
+  enhance_native:
+    description: "Enhance with native framework features"
+    complexity: "moderate"
+    supported_frameworks: ["apache_struts", "spring_boot"]
+  
+  microservice_pattern:
+    description: "Apply microservice patterns"
+    complexity: "advanced"
+    supported_frameworks: ["micronaut", "quarkus", "spring_boot"]
+
+# Performance and Reliability Settings
+performance:
+  # Framework intelligence settings
+  intelligence_service:
+    cache_results: true
+    analysis_timeout_seconds: 15
+    confidence_calculation_method: "weighted_average"
+  
+  # Template generation settings
+  template_generation:
+    parallel_processing: true
+    batch_size: 5
+    max_concurrent_requests: 3
+  
+  # Error handling settings
+  error_handling:
+    max_retry_attempts: 3
+    fallback_to_static: true
+    log_adaptation_failures: true
+
+# Feature Flags
+feature_flags:
+  enable_framework_intelligence: true
+  enable_template_customization: true
+  enable_dynamic_template_selection: true
+  enable_vulnerability_specific_optimization: true
+  enable_performance_monitoring: true
+  enable_adaptation_metrics: true
+
+# Security Settings
+security:
+  # Allowed vulnerability types for adaptation
+  allowed_vulnerability_types:
+    - "deserialization"
+    - "web_vulnerability"
+    - "injection"
+    - "library_vulnerability"
+    - "overflow"
+    - "xxe"
+    - "rce"
+  
+  # Framework security considerations
+  framework_security_notes:
+    apache_struts: "Known for historical vulnerabilities - ideal for security research"
+    spring_boot: "Production framework - ensure dev profile only"
+    micronaut: "Compile-time DI reduces runtime attack surface"
+    quarkus: "Native compilation provides additional security benefits"
+    standalone_jar: "Minimal attack surface - good for library-specific vulnerabilities"

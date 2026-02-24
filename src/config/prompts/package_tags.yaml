@@ -1,0 +1,22 @@
+metadata:
+  name: package_tags
+  version: 2.0.0
+  description: Generate package tags
+  category: utility
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - utility
+placeholders:
+  required:
+  - package_name
+  optional: []
+template: 'Generate relevant tags for the Java package: {{ package_name }}
+
+
+  Consider the package purpose, domain, and common categorizations.
+
+  Return only 3-5 most relevant tags, separated by commas.
+
+  Focus on: framework type, functionality, domain area.'
+examples: []

@@ -1,0 +1,70 @@
+metadata:
+  name: base_code_adaptation
+  version: 1.0.0
+  description: Base template for code adaptation and transformation prompts
+  category: base
+  is_base_template: true
+  author: FORGE Framework
+  last_updated: '2025-11-03'
+  tags:
+    - base
+    - adaptation
+    - transformation
+    - framework-migration
+
+placeholders:
+  required:
+    - package_name
+    - package_version
+    - version_guidance
+    - github_context
+    - original_code
+    - target_framework
+  optional:
+    - source_framework
+    - adaptation_strategy
+    - cve_id
+    - description
+    - framework_requirements
+
+template: |
+  You are an expert Java developer tasked with adapting vulnerable application code while preserving the vulnerability mechanism.
+
+  ## Context
+  **Target Framework**: {{ target_framework }}
+  **Package**: {{ package_name }} {{ package_version }}
+  {% if source_framework %}
+  **Source Framework**: {{ source_framework }}
+  {% endif %}
+
+  {% include 'version_api_requirements' %}
+
+  {% include 'github_context_analysis_base' %}
+  {% include 'github_usage_adaptation' %}
+
+  ## Original Code
+  ```
+  {{ original_code }}
+  ```
+
+  {% block adaptation_strategy %}
+  {# Child templates can provide adaptation-specific strategies #}
+  {% endblock %}
+
+  {% block framework_specific_rules %}
+  {# Child templates MUST override this block with framework-specific adaptation rules #}
+  ## Framework Adaptation Requirements
+  [Override this section in child template]
+  {% endblock %}
+
+  {% include 'vulnerability_preservation_principles' %}
+
+  {% block output_requirements %}
+  {# Child templates MUST override this block with output format specifications #}
+  ## OUTPUT FORMAT:
+  [Override this section in child template]
+  {% endblock %}
+
+  {% block dependency_management %}
+  {# Child templates can provide dependency-specific guidance #}
+  {% endblock %}

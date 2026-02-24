@@ -1,0 +1,548 @@
+# This file contains template-driven configuration for all framework services
+# enabling flexible behavior control without code changes
+
+# Container Service Configuration
+container_service:
+  # Build configuration
+  build:
+    timeout_seconds: 300
+    max_retries: 3
+    retry_delay_seconds: 10
+    enable_parallel_builds: false
+    
+  # Log management
+  logging:
+    enable_filtered_output: true
+    max_build_log_size_mb: 10
+    preserve_full_logs_debug: true
+    log_filter_config_path: "src/config/log_filtering.yaml"
+    
+  # Resource management
+  resources:
+    min_disk_space_mb: 100
+    max_memory_usage_mb: 2048
+    check_resources_before_build: true
+    cleanup_failed_builds: true
+    
+  # Container registry settings
+  registry:
+    enable_image_caching: true
+    cache_ttl_hours: 24
+    max_cached_images: 50
+    auto_cleanup_old_images: true
+    
+  # Health checks
+  health_checks:
+    enable_container_health_monitoring: true
+    health_check_interval_seconds: 30
+    max_health_check_failures: 3
+    auto_restart_failed_containers: false
+
+# LLM Service Configuration
+llm_service:
+  # Response processing
+  response_processing:
+    enable_json_validation: true
+    enable_response_caching: true
+    cache_ttl_hours: 6
+    max_response_cache_size: 1000
+
+  # JSON validation settings
+  json_validation:
+    schemas_config_path: "src/config/llm_schemas.yaml"
+    enable_automatic_repair: true
+    max_repair_attempts: 3
+    log_validation_failures: true
+    fallback_behavior: "use_fallback_values"  # Options: use_fallback_values, return_error, use_partial
+
+  # Circuit breaker configuration
+  reliability:
+    enable_circuit_breaker: true
+    failure_threshold: 5
+    recovery_timeout_seconds: 60
+    half_open_max_calls: 3
+
+  # Performance settings
+  performance:
+    max_concurrent_requests: 10
+    request_timeout_seconds: 60
+    enable_request_batching: false
+    batch_size: 5
+
+  # Model-specific settings
+  models:
+    default_temperature: 0.1
+    default_max_tokens: 4000
+    enable_streaming: false
+
+  # Prompt management
+  prompts:
+    template_directory: "src/config/prompts"
+    enable_template_caching: true
+    validate_templates_on_startup: true
+    template_cache_ttl_hours: 24
+
+  # Azure OpenAI Error Handling Configuration
+  # Reference: https://platform.openai.com/docs/guides/error-codes
+  # Reference: https://learn.microsoft.com/en-us/azure/ai-services/openai/reference
+  error_handling:
+    # HTTP Status Codes from Azure OpenAI API
+    http_status_codes:
+      400:
+        name: "Bad Request"
+        description: "The request was malformed or contained invalid parameters"
+        retryable: false
+      401:
+        name: "Unauthorized"
+        description: "Invalid, expired, or revoked API key"
+        retryable: false
+      403:
+        name: "Forbidden"
+        description: "Insufficient permissions for the requested resource"
+        retryable: false
+      404:
+        name: "Not Found"
+        description: "The requested resource or deployment does not exist"
+        retryable: false
+      408:
+        name: "Request Timeout"
+        description: "The request took too long to complete"
+        retryable: true
+      409:
+        name: "Conflict"
+        description: "Resource conflict, possibly due to concurrent operations"
+        retryable: true
+      413:
+        name: "Payload Too Large"
+        description: "Request payload exceeds the maximum allowed size"
+        retryable: false
+      422:
+        name: "Unprocessable Entity"
+        description: "Request validation failed - semantic error in request"
+        retryable: false
+      429:
+        name: "Too Many Requests"
+        description: "Rate limit exceeded - too many requests in a given time period"
+        retryable: true
+      500:
+        name: "Internal Server Error"
+        description: "Server-side error occurred in the Azure OpenAI service"
+        retryable: true
+      502:
+        name: "Bad Gateway"
+        description: "Server received an invalid response from upstream"
+        retryable: true
+      503:
+        name: "Service Unavailable"
+        description: "Server temporarily overloaded or under maintenance"
+        retryable: true
+      504:
+        name: "Gateway Timeout"
+        description: "Server did not receive a timely response from upstream"
+        retryable: true
+
+    # Azure Content Safety Error Codes
+    # Reference: https://learn.microsoft.com/en-us/azure/ai-services/content-safety/concepts/response-codes
+    content_safety_codes:
+      content_filter:
+        name: "Content Filter Triggered"
+        description: "The prompt or response triggered Azure OpenAI's content management policy"
+        retryable: false
+        recommendation: "Modify the prompt to avoid triggering content filters"
+      content_policy_violation:
+        name: "Content Policy Violation"
+        description: "The request violates Azure OpenAI content policy guidelines"
+        retryable: false
+        recommendation: "Review and modify content to comply with usage policies"
+      responsible_ai_policy:
+        name: "Responsible AI Policy"
+        description: "Request blocked due to responsible AI policy enforcement"
+        retryable: false
+        recommendation: "Ensure content aligns with responsible AI guidelines"
+
+    # OpenAI SDK Exception to HTTP Status Code Mapping
+    exception_mapping:
+      BadRequestError: 400
+      AuthenticationError: 401
+      PermissionDeniedError: 403
+      NotFoundError: 404
+      UnprocessableEntityError: 422
+      RateLimitError: 429
+      InternalServerError: 500
+      APIConnectionError: 0  # Special code for connection errors (no HTTP response)
+      APITimeoutError: 408
+
+    # Retry Configuration per Error Type
+    retry_config:
+      rate_limit:
+        max_retries: 5
+        base_delay_seconds: 2
+        max_delay_seconds: 60
+        backoff_type: "exponential"  # exponential or linear
+      connection_error:
+        max_retries: 3
+        base_delay_seconds: 2
+        max_delay_seconds: 30
+        backoff_type: "linear"
+      server_error:
+        max_retries: 3
+        base_delay_seconds: 1
+        max_delay_seconds: 10
+        backoff_type: "exponential"
+      timeout:
+        max_retries: 2
+        base_delay_seconds: 5
+        max_delay_seconds: 30
+        backoff_type: "linear"
+
+# Error Recovery Service Configuration
+error_recovery_service:
+  # Recovery behavior
+  recovery:
+    enabled: true
+    max_attempts_per_error: 3
+    enable_llm_analysis: true
+    enable_pattern_learning: true
+    enable_automatic_rollback: true
+    require_validation_after_fix: true
+    
+  # Log processing for error analysis
+  log_processing:
+    enable_filtered_analysis: true
+    max_log_size_for_analysis_mb: 5
+    extract_structured_summaries: true
+    include_context_lines: 3
+    
+  # Pattern matching
+  pattern_matching:
+    confidence_threshold: 0.7
+    enable_fuzzy_matching: true
+    max_patterns_to_check: 100
+    update_patterns_from_successful_fixes: true
+    
+  # LLM integration for error analysis
+  llm_analysis:
+    temperature: 0.2
+    max_tokens: 2000
+    enable_error_classification: true
+    enable_confidence_scoring: true
+    include_recovery_recommendations: true
+    
+  # Storage and caching
+  storage:
+    cache_error_patterns: true
+    cache_successful_fixes: true
+    learning_data_retention_days: 90
+    max_cached_patterns: 500
+
+# Framework Adaptation Service Configuration
+framework_adaptation_service:
+  # Adaptation behavior
+  adaptation:
+    enabled: true
+    enable_llm_driven_selection: true
+    enable_code_adaptation: true
+    enable_template_customization: true
+    
+  # Framework detection
+  detection:
+    enable_intelligence_service: true
+    enable_llm_enhancement: true
+    confidence_threshold: 0.6
+    fallback_to_pattern_matching: true
+    
+  # Code adaptation strategies
+  code_adaptation:
+    max_adaptation_attempts: 3
+    enable_validation_after_adaptation: true
+    preserve_original_code: true
+    enable_incremental_adaptation: true
+    
+  # Template customization
+  template_customization:
+    enable_llm_customization: true
+    cache_customizations: true
+    cache_ttl_hours: 48
+    max_cached_customizations: 200
+    fallback_to_basic_templates: true
+    
+  # Performance settings
+  performance:
+    enable_parallel_adaptation: false
+    adaptation_timeout_seconds: 120
+    enable_adaptation_caching: true
+
+# Template Manager Configuration
+template_manager:
+  # Template management
+  templates:
+    core_templates_directory: "src/templates/core"
+    custom_templates_directory: "src/templates/custom"
+    enable_dynamic_selection: true
+    validate_templates_on_load: true
+    
+  # Framework detection
+  framework_detection:
+    enable_llm_enhancement: true
+    pattern_matching_enabled: true
+    patterns_config_path: "src/config/framework_patterns.yaml"
+    fallback_framework: "standalone_jar"
+    
+  # Customization
+  customization:
+    enable_llm_customization: true
+    customization_service_enabled: true
+    cache_customizations: true
+    max_customization_cache_size: 500
+    
+  # Validation
+  validation:
+    validate_pom_xml: true
+    validate_dependencies: true
+    check_framework_compatibility: true
+    enable_dependency_conflict_detection: true
+
+# Exploit Validation Service Configuration
+exploit_validation_service:
+  # Log management
+  logging:
+    enable_log_filtering: true
+    save_container_logs: true
+    container_logs_directory: "data/monitoring/container_logs"
+    max_log_retention_days: 30
+    
+  # IoC collection
+  ioc_collection:
+    enabled: true
+    collection_directory: "data/monitoring/ioc_collection" 
+    max_ioc_categories: 20
+    enable_structured_storage: true
+    confidence_threshold: 0.5
+    
+  # Validation behavior
+  validation:
+    timeout_seconds: 300
+    max_validation_attempts: 3
+    enable_error_recovery: true
+    require_container_logs: true
+    
+  # Performance
+  performance:
+    enable_parallel_validation: false
+    max_concurrent_validations: 3
+    enable_validation_caching: true
+    cache_ttl_hours: 12
+
+# Deployment Agent Configuration  
+deployment_agent:
+  # Build management
+  build:
+    max_build_attempts: 3
+    build_timeout_seconds: 600
+    enable_framework_adaptation: true
+    cleanup_failed_builds: true
+    
+  # Container management
+  containers:
+    auto_cleanup_old_containers: true
+    max_container_age_hours: 24
+    enable_container_health_checks: true
+    restart_failed_containers: false
+    
+  # Error handling
+  error_handling:
+    enable_error_recovery: true
+    enable_build_log_analysis: true
+    max_error_recovery_attempts: 3
+    fallback_to_basic_templates: true
+
+# System Integration Service Configuration
+system_integration:
+  # Processing behavior
+  processing:
+    enable_enhanced_guidance: true
+    max_packages_per_batch: 10
+    enable_parallel_processing: false
+    processing_timeout_seconds: 1800
+    
+  # Package management
+  packages:
+    enable_version_extraction: true
+    validate_package_versions: true
+    check_osv_compatibility: true
+    enable_dependency_analysis: true
+    
+  # Monitoring
+  monitoring:
+    track_processing_metrics: true
+    log_processing_progress: true
+    enable_progress_callbacks: false
+    save_processing_results: true
+
+# GitHub Context Service Configuration
+github_context_service:
+  # GitHub API configuration
+  api:
+    api_base_url: "https://api.github.com"
+    user_agent: "FORGE-Vulnerability-Research"
+
+    # Smart diff extraction limits
+    max_diff_chars_per_file: 800
+    max_files_with_diffs: 5
+    max_files_for_diff_extraction: 3  # Always extract if ≤ this
+    never_extract_above_files: 20     # Never extract if > this
+
+    # Issue/comment extraction
+    max_issue_description_chars: 3000
+    max_issue_comments: 5
+    max_comment_chars: 800
+
+    # PR extraction
+    max_pr_description_chars: 2000
+
+  # Classification configuration
+  classification:
+    config_path: "src/config/github_classification.yaml"
+    enable_config_driven_patterns: true
+
+  # Metadata extraction
+  extraction:
+    max_references_per_vulnerability: 10
+    request_timeout_seconds: 30
+    rate_limit_delay_seconds: 2.0  # GitHub API: 60 req/hour unauthenticated
+
+  # Caching
+  caching:
+    enabled: true
+    retention_days: 7
+    cache_directory: "data/github_context_cache"
+
+  # Circuit breaker
+  reliability:
+    enable_circuit_breaker: true
+    failure_threshold: 5
+    recovery_timeout_seconds: 60
+
+# OSV Client Configuration
+osv_client:
+  # API settings
+  api:
+    base_url: "https://api.osv.dev"
+    timeout_seconds: 30
+    max_retries: 3
+    retry_delay_seconds: 5
+    
+  # Caching
+  caching:
+    enable_response_caching: true
+    cache_ttl_hours: 24
+    max_cache_size_mb: 100
+    cache_directory: "data/cache/osv"
+    
+  # Rate limiting
+  rate_limiting:
+    requests_per_minute: 60
+    burst_limit: 10
+    enable_backoff: true
+    
+  # Data processing
+  processing:
+    filter_by_year: true
+    minimum_year: 2018
+    enable_vulnerability_enrichment: true
+    extract_references: true
+
+# Global Performance Settings
+performance:
+  # Memory management
+  memory:
+    enable_memory_monitoring: true
+    max_memory_usage_mb: 4096
+    garbage_collection_threshold_mb: 1024
+    
+  # CPU management  
+  cpu:
+    max_cpu_cores: 4
+    enable_cpu_throttling: false
+    cpu_usage_threshold_percent: 80
+    
+  # Disk management
+  disk:
+    enable_disk_monitoring: true
+    min_free_space_mb: 1024
+    auto_cleanup_temp_files: true
+    temp_file_max_age_hours: 24
+    
+  # Concurrency
+  concurrency:
+    max_concurrent_operations: 5
+    enable_operation_queueing: true
+    queue_max_size: 50
+    operation_timeout_seconds: 300
+
+# Global Reliability Settings
+reliability:
+  # Circuit breakers
+  circuit_breakers:
+    enabled: true
+    default_failure_threshold: 5
+    default_recovery_timeout_seconds: 60
+    default_half_open_max_calls: 3
+    
+  # Retry policies
+  retry_policies:
+    enabled: true
+    default_max_retries: 3
+    default_retry_delay_seconds: 5
+    exponential_backoff: true
+    max_backoff_seconds: 60
+    
+  # Health monitoring
+  health_monitoring:
+    enabled: true
+    check_interval_seconds: 30
+    unhealthy_threshold: 3
+    recovery_threshold: 2
+
+# Global Security Settings
+security:
+  # Input validation
+  input_validation:
+    enabled: true
+    max_input_size_mb: 50
+    validate_file_extensions: true
+    allowed_file_extensions: [".java", ".xml", ".yaml", ".yml", ".json", ".txt", ".md"]
+    
+  # Output sanitization
+  output_sanitization:
+    enabled: true
+    sanitize_logs: true
+    mask_sensitive_data: true
+    sensitive_patterns: ["password", "token", "key", "secret"]
+    
+  # Access control
+  access_control:
+    enable_file_path_validation: true
+    restrict_file_access: true
+    allowed_base_paths: ["data/", "src/templates/", "src/config/"]
+
+# Debugging and Development
+debug:
+  # Logging
+  logging:
+    enable_verbose_logging: false
+    log_performance_metrics: true
+    log_memory_usage: false
+    enable_trace_logging: false
+    
+  # Testing
+  testing:
+    enable_test_mode: false
+    use_mock_services: false
+    enable_performance_testing: false
+    
+  # Development features
+  development:
+    enable_hot_reloading: false
+    validate_configurations_on_change: true
+    enable_config_file_watching: false

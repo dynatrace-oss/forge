@@ -1,0 +1,33 @@
+metadata:
+  name: poc_analysis
+  version: 2.0.0
+  description: Analyze PoC execution results
+  category: exploit_generation
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - exploit_generation
+  - exploitation
+placeholders:
+  required:
+  - poc_content
+  - vulnerability_cve_id
+  - vulnerability_description
+  - vulnerability_package_name
+  - vulnerability_type
+  optional: []
+template: "Analyze this Proof of Concept (PoC) code for vulnerability {{ vulnerability_cve_id\
+  \ }}:\n\nVULNERABILITY CONTEXT:\n- CVE ID: {{ vulnerability_cve_id }}\n- Package:\
+  \ {{ vulnerability_package_name }}\n- Type: {{ vulnerability_type }}\n- Description:\
+  \ {{ vulnerability_description }}\n\nPOC CODE:\n```\n{{ poc_content }}\n```\n\n\
+  Please analyze this PoC and provide the following information in JSON format:\n\n\
+  {% raw %}{\n    \"technique\": \"primary exploitation technique used\",\n    \"confidence\"\
+  : 0.8,\n    \"endpoints\": [\"list of target endpoints/URLs\"],\n    \"attack_vectors\"\
+  : [\"list of attack vectors used\"],\n    \"payloads\": [\"list of payload patterns\"\
+  ],\n    \"adaptation_strategy\": \"how to adapt this for container testing\",\n\
+  \    \"modifications\": [\"required modifications for automation\"],\n    \"requirements\"\
+  : [\"environment/dependency requirements\"],\n    \"success_indicators\": [\"indicators\
+  \ of successful exploitation\"],\n    \"risk_assessment\": \"low/medium/high\",\n\
+  \    \"analysis_confidence\": 0.7\n}{% endraw %}\n\nFocus on practical exploitation techniques\
+  \ that can be automated safely in a container environment."
+examples: []

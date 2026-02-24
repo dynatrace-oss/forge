@@ -1,0 +1,128 @@
+# Framework Config File Manifests
+# Defines which config files each framework needs and where they go
+# This enables multi-config file support for all frameworks (similar to Struts pattern)
+#
+# Format:
+#   framework_name:
+#     config_files:
+#       - template: "path/to/template" (relative to templates/framework/configs/)
+#         destination: "destination/in/project"
+#         render: true/false (whether to use Jinja2 rendering)
+#         variables: [list of variables required for rendering]
+#         condition: (optional - conditional inclusion)
+#           field: "field_name"
+#           values: ["allowed", "values"]
+
+apache_struts:
+  config_files:
+    - template: "struts/web.xml"
+      destination: "src/main/webapp/WEB-INF/web.xml"
+      render: true
+      variables:
+        - struts_filter_class
+
+    - template: "struts/struts.xml"
+      destination: "src/main/resources/struts.xml"
+      render: true
+      variables:
+        - action_class_name
+
+    - template: "struts/success.jsp"
+      destination: "src/main/webapp/success.jsp"
+      render: false
+
+    - template: "struts/error.jsp"
+      destination: "src/main/webapp/error.jsp"
+      render: false
+
+    - template: "struts/health.jsp"
+      destination: "src/main/webapp/health.jsp"
+      render: false
+
+protocol_server:
+  config_files:
+    # Base config for all protocols
+    - template: "protocol/application.yml"
+      destination: "src/main/resources/application.yml"
+      render: true
+      variables:
+        - server_port
+        - max_connections
+        - http2_enabled
+        - websocket_enabled
+        - protocol_type
+
+    # Protocol-specific configs (conditional)
+    - template: "protocol/remoting-jboss.xml"
+      destination: "src/main/resources/remoting-jboss.xml"
+      render: false
+      condition:
+        field: "protocol_type"
+        values: ["Remoting Protocol", "WildFly Remoting"]
+
+    - template: "protocol/kafka.yml"
+      destination: "src/main/resources/kafka.yml"
+      render: true
+      condition:
+        field: "protocol_type"
+        values: ["Kafka", "Kafka Protocol"]
+      variables:
+        - kafka_bootstrap_servers
+        - kafka_topic
+
+    - template: "protocol/netty-bootstrap.xml"
+      destination: "src/main/resources/netty-bootstrap.xml"
+      render: false
+      condition:
+        field: "protocol_type"
+        values: ["Netty Protocol", "gRPC"]
+
+micronaut:
+  config_files:
+    - template: "micronaut/application.yml"
+      destination: "src/main/resources/application.yml"
+      render: true
+      variables:
+        - server_port
+        - micronaut_server_netty_max_connections
+
+quarkus:
+  config_files:
+    - template: "quarkus/application.properties"
+      destination: "src/main/resources/application.properties"
+      render: true
+      variables:
+        - quarkus_http_port
+        - quarkus_http_io_threads
+
+kafka_client:
+  config_files:
+    - template: "protocol/application.yml"
+      destination: "src/main/resources/application.yml"
+      render: true
+      variables:
+        - server_port
+
+    - template: "protocol/kafka.yml"
+      destination: "src/main/resources/kafka.yml"
+      render: true
+      variables:
+        - kafka_bootstrap_servers
+        - kafka_producer_acks
+        - kafka_consumer_group
+        - kafka_input_topic
+        - kafka_output_topic
+
+    - template: "kafka/producer.properties"
+      destination: "src/main/resources/producer.properties"
+      render: true
+      condition:
+        field: "kafka_role"
+        values: ["producer", "both"]
+
+    - template: "kafka/consumer.properties"
+      destination: "src/main/resources/consumer.properties"
+      render: true
+      condition:
+        field: "kafka_role"
+        values: ["consumer", "both"]

@@ -1,0 +1,117 @@
+# Universal Containerfile for HTTP-Based Java Vulnerability Demonstrations
+# All applications run as Spring Boot web applications accessible on port 8080
+
+# Build stage
+# Note: Use eclipse-temurin for Java 17+ as openjdk images were deprecated
+FROM maven:3.9-eclipse-temurin-{{ java_version }} AS build
+WORKDIR /app
+COPY pom.xml .
+
+# Download dependencies first for better layer caching
+RUN mvn dependency:go-offline -B || true
+
+# Copy source and build
+COPY src ./src
+
+# Spring Boot Maven Plugin requires src/main/resources/ to exist for repackaging
+# Without this directory, the plugin silently skips repackaging and creates thin JARs
+RUN mkdir -p /app/src/main/resources
+
+# Spring Boot Maven Plugin's repackage goal is bound to package phase
+# With default attach=true (in POM), the fat JAR replaces the thin JAR automatically
+# DO NOT run 'mvn spring-boot:repackage' separately - it causes "Source file must not be null" error
+RUN mvn clean package -DskipTests && \
+    echo "=== Build Verification ===" && \
+    echo "JAR files created:" && \
+    ls -lh /app/target/*.jar && \
+    JAR_SIZE=$(stat -c%s /app/target/*.jar 2>/dev/null || stat -f%z /app/target/*.jar 2>/dev/null || echo 0) && \
+    echo "JAR size: $JAR_SIZE bytes" && \
+    if [ "$JAR_SIZE" -lt 1000000 ]; then \
+        echo "ERROR: JAR is too small ($JAR_SIZE bytes) - Spring Boot repackage likely failed!" && \
+        echo "Expected: 25MB+ (fat JAR with dependencies)" && \
+        echo "Got: Thin JAR with only compiled classes" && \
+        echo "" && \
+        echo "🔍 Diagnosing JAR structure:" && \
+        unzip -l /app/target/*.jar | head -20 && \
+        echo "" && \
+        if ! unzip -l /app/target/*.jar | grep -q "BOOT-INF/"; then \
+            echo "❌ Missing BOOT-INF/ directory - this is NOT a Spring Boot fat JAR" && \
+            echo "   Spring Boot repackage goal did not execute properly" && \
+            echo "   Check POM configuration: <attach> should be true (default)"; \
+        fi && \
+        exit 1; \
+    fi && \
+    echo "✅ JAR verification passed - fat JAR created successfully" && \
+    echo "🔍 Verifying Spring Boot structure:" && \
+    if unzip -l /app/target/*.jar | grep -q "BOOT-INF/lib/"; then \
+        echo "✅ BOOT-INF/lib/ exists - dependencies bundled correctly" && \
+        DEP_COUNT=$(unzip -l /app/target/*.jar | grep "BOOT-INF/lib/" | wc -l | tr -d ' ') && \
+        echo "✅ Found $DEP_COUNT dependencies in fat JAR"; \
+    else \
+        echo "⚠️  BOOT-INF/lib/ not found - JAR may not be properly packaged"; \
+    fi
+
+# Run stage - using minimal JRE image
+# Note: Use eclipse-temurin for Java 17+ as openjdk images were deprecated
+FROM eclipse-temurin:{{ java_version }}-jre
+WORKDIR /app
+
+# Install wget for health checks
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN groupadd -r vulnapp && useradd -r -g vulnapp vulnapp && \
+    mkdir -p /app/resources && \
+    chown -R vulnapp:vulnapp /app
+
+# Copy application artifacts from build stage
+COPY --from=build --chown=vulnapp:vulnapp /app/target/*.jar /app/app.jar
+
+# Create resources directory
+RUN mkdir -p /app/resources && chown -R vulnapp:vulnapp /app/resources
+
+# Set security-related flags for Java
+ENV JAVA_TOOL_OPTIONS="-Djava.security.egd=file:/dev/./urandom -Djava.awt.headless=true"
+
+# Set resource limits for vulnerability testing (allow OOM detection without container exit)
+ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/oom_dump.hprof -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+
+# Switch to non-root user
+USER vulnapp
+
+RUN echo '#!/bin/sh\n\
+echo "=== FORGE Vulnerability Research Framework ==="\n\
+echo "CVE IDs: {{ cve_ids }}"\n\
+echo "Package: {{ package_name }} {{ package_version }}"\n\
+echo "Application Type: Spring Boot Web Application"\n\
+echo "HTTP Endpoints: Accessible on port 8080"\n\
+echo "WARNING: This container demonstrates vulnerabilities!"\n\
+echo "========================================="\n\
+echo\n\
+echo "🔍 Container Startup Diagnostics:"\n\
+echo "Java version:"\n\
+java -version 2>&1\n\
+echo\n\
+echo "JAR file info:"\n\
+ls -lh /app/app.jar 2>&1\n\
+echo\n\
+echo "JVM Options: $JAVA_OPTS"\n\
+echo\n\
+echo "📦 Starting Spring Boot web application on port 8080..."\n\
+echo "All vulnerabilities are accessible via HTTP endpoints"\n\
+echo\n\
+echo "⚠️  If container exits immediately, check logs above for errors"\n\
+echo\n\
+exec java $JAVA_OPTS -jar /app/app.jar 2>&1' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+# HTTP-based health check for Spring Boot web applications
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
+    CMD (wget -q -O /dev/null http://localhost:8080/actuator/health || \
+         wget -q -O /dev/null http://localhost:8080/ || \
+         wget -q -O /dev/null http://localhost:8080/api/) && echo "OK" || exit 1
+
+# Expose port 8080 for HTTP-based vulnerability access
+EXPOSE 8080
+
+ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]

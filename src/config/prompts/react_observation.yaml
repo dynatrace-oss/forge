@@ -1,0 +1,60 @@
+metadata:
+  name: react_observation
+  version: 2.0.0
+  description: ReAct observation phase for error recovery
+  category: react
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - error-recovery
+  - react
+placeholders:
+  required:
+  - action_description
+  - error_logs
+  - iteration
+  - results
+  optional: []
+template: 'You are evaluating the results of an error recovery action in iteration
+  {{ iteration }}.
+
+
+  ACTION TAKEN:
+
+  {{ action_description }}
+
+
+  RESULTS:
+
+  {{ results }}
+
+
+  ERROR LOGS:
+
+  {{ error_logs }}
+
+
+  EVALUATION TASK:
+
+  1. Determine if the action was successful
+
+  2. Assess if the original error has been resolved
+
+  3. Decide if recovery should continue or stop
+
+
+  Provide your evaluation in this format:
+
+
+  ANALYSIS: [Your analysis of the action results]
+
+  ACTION_SUCCESS: [YES|NO - was the action itself successful]
+
+  RECOVERY_COMPLETE: [YES|NO - is the original error fixed]
+
+  SHOULD_CONTINUE: [YES|NO - should we try another iteration]
+
+  CONFIDENCE: [0.0-1.0 confidence in this assessment]
+
+  NEXT_FOCUS: [What should be the focus of the next iteration, if continuing]'
+examples: []

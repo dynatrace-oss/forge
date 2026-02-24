@@ -1,0 +1,344 @@
+# This configuration defines expected JSON schemas for LLM responses
+# Used for validation and parsing of LLM outputs
+
+# Framework Detection Schema for Web-Based Demonstrations
+framework_detection:
+  type: object
+  required: 
+    - framework_type
+    - rationale
+  properties:
+    framework_type:
+      type: string
+      enum: 
+        - "spring_boot"
+        - "apache_struts"
+        - "micronaut"
+        - "quarkus"
+        - "web_application"
+        - "jenkins_plugin"
+      description: "The detected web framework type for HTTP-based demonstrations"
+    rationale:
+      type: string
+      description: "Explanation for the framework selection"
+    confidence:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Confidence score for the detection"
+    required_dependencies:
+      type: array
+      items:
+        type: string
+      description: "List of required dependencies for this framework"
+    suggested_changes:
+      type: array
+      items:
+        type: string
+      description: "Suggested code changes for framework adaptation"
+  
+  # Fallback values when parsing fails
+  fallback:
+    framework_type: "spring_boot"
+    rationale: "JSON parsing failed, using Spring Boot web application fallback"
+    confidence: 0.0
+
+# Template Customization Schema
+template_customization:
+  type: object
+  required:
+    - customized_template
+    - customization_success
+  properties:
+    customized_template:
+      type: string
+      description: "The customized template content"
+    configuration_files:
+      type: object
+      description: "Additional configuration files to create"
+      additionalProperties:
+        type: string
+    framework_files:
+      type: object
+      description: "Framework-specific files to create"
+      additionalProperties:
+        type: string
+    customization_notes:
+      type: string
+      description: "Notes about the customization process"
+    customization_success:
+      type: boolean
+      description: "Whether customization was successful"
+    dependencies_added:
+      type: array
+      items:
+        type: string
+      description: "Dependencies added during customization"
+    dependencies_removed:
+      type: array
+      items:
+        type: string
+      description: "Dependencies removed during customization"
+    build_optimizations:
+      type: array
+      items:
+        type: string
+      description: "Build optimizations applied"
+    vulnerability_specific_notes:
+      type: array
+      items:
+        type: string
+      description: "Notes specific to the vulnerability"
+  
+  # Fallback values when parsing fails
+  fallback:
+    customized_template: ""
+    customization_success: false
+    configuration_files: {}
+    framework_files: {}
+    customization_notes: "Template customization failed - using fallback"
+    dependencies_added: []
+    dependencies_removed: []
+    build_optimizations: []
+    vulnerability_specific_notes: []
+
+# Error Analysis Schema
+error_analysis:
+  type: object
+  required:
+    - ERROR_CLASSIFICATION
+    - ROOT_CAUSE_ANALYSIS
+  properties:
+    ERROR_CLASSIFICATION:
+      type: string
+      enum:
+        - "DEPENDENCY_RESOLUTION_FAILURE"
+        - "COMPILATION_ERROR"
+        - "RUNTIME_ERROR"
+        - "CONFIGURATION_ERROR"
+        - "NETWORK_ERROR"
+        - "PERMISSION_ERROR"
+        - "RESOURCE_EXHAUSTION"
+        - "UNKNOWN_ERROR"
+      description: "Classification of the error type"
+    ROOT_CAUSE_ANALYSIS:
+      type: string
+      description: "Detailed analysis of the root cause"
+    CONFIDENCE_SCORE:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Confidence in the analysis"
+    RECOMMENDED_ACTIONS:
+      type: array
+      items:
+        type: string
+      description: "Recommended actions to fix the error"
+    AFFECTED_COMPONENTS:
+      type: array
+      items:
+        type: string
+      description: "Components affected by this error"
+    SEVERITY:
+      type: string
+      enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+      description: "Severity level of the error"
+    RECOVERY_FEASIBLE:
+      type: boolean
+      description: "Whether automatic recovery is feasible"
+  
+  # Fallback values when parsing fails
+  fallback:
+    ERROR_CLASSIFICATION: "UNKNOWN_ERROR"
+    ROOT_CAUSE_ANALYSIS: "Error analysis failed - manual investigation required"
+    CONFIDENCE_SCORE: 0.0
+    RECOMMENDED_ACTIONS: ["Manual investigation required"]
+    AFFECTED_COMPONENTS: ["unknown"]
+    SEVERITY: "MEDIUM"
+    RECOVERY_FEASIBLE: false
+
+# Framework Selection Schema (for web-based adaptation service)
+framework_selection:
+  type: object
+  required:
+    - selected_framework
+    - confidence_score
+  properties:
+    selected_framework:
+      type: string
+      enum:
+        - "SPRING_BOOT"
+        - "APACHE_STRUTS"
+        - "MICRONAUT"
+        - "QUARKUS"
+        - "WEB_APPLICATION"
+        - "JENKINS_PLUGIN"
+      description: "Selected web framework for HTTP-based vulnerability demonstration"
+    confidence_score:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Confidence in the selection"
+    reasoning:
+      type: string
+      description: "Reasoning for the framework selection"
+    suitability_factors:
+      type: array
+      items:
+        type: string
+      description: "Factors that make this framework suitable"
+    alternative_frameworks:
+      type: array
+      items:
+        type: object
+        properties:
+          framework:
+            type: string
+          score:
+            type: number
+          notes:
+            type: string
+      description: "Alternative framework options with scores"
+    required_adaptations:
+      type: array
+      items:
+        type: string
+      description: "Required code adaptations for this framework"
+  
+  # Fallback values when parsing fails
+  fallback:
+    selected_framework: "SPRING_BOOT"
+    confidence_score: 0.3
+    reasoning: "Framework selection failed, using Spring Boot web application fallback"
+    suitability_factors: ["safe web application default option"]
+    alternative_frameworks: []
+    required_adaptations: ["Convert to HTTP endpoints"]
+
+# Code Adaptation Schema
+code_adaptation:
+  type: object
+  required:
+    - adapted_code
+    - adaptation_success
+  properties:
+    adapted_code:
+      type: object
+      description: "Adapted code files"
+      additionalProperties:
+        type: string
+    adaptation_success:
+      type: boolean
+      description: "Whether adaptation was successful"
+    adaptation_strategy:
+      type: string
+      enum:
+        - "CONVERT_TO_WEB"
+        - "CONVERT_FRAMEWORK"
+        - "ENHANCE_NATIVE"
+        - "MICROSERVICE_PATTERN"
+        - "WEB_ENDPOINT_PATTERN"
+      description: "Strategy used for web-based adaptation"
+    changes_made:
+      type: array
+      items:
+        type: string
+      description: "List of changes made during adaptation"
+    framework_specific_additions:
+      type: object
+      description: "Framework-specific files added"
+      additionalProperties:
+        type: string
+    dependencies_updated:
+      type: array
+      items:
+        type: string
+      description: "Dependencies updated during adaptation"
+    validation_notes:
+      type: array
+      items:
+        type: string
+      description: "Validation notes for the adapted code"
+  
+  # Fallback values when parsing fails
+  fallback:
+    adapted_code: {}
+    adaptation_success: false
+    adaptation_strategy: "CONVERT_TO_WEB"
+    changes_made: ["Adaptation failed - converting to web application fallback"]
+    framework_specific_additions: {}
+    dependencies_updated: []
+    validation_notes: ["Code adaptation failed - using web application fallback"]
+
+# General Validation Settings
+validation:
+  # Maximum response size to validate (in characters)
+  max_response_size: 50000
+  
+  # Timeout for schema validation (in seconds)
+  validation_timeout: 5
+  
+  # Whether to log validation failures
+  log_validation_failures: true
+  
+  # Whether to attempt JSON repair for minor issues
+  attempt_json_repair: true
+  
+  # Fallback behavior when validation fails
+  fallback_behavior: "use_fallback_values"  # Options: "use_fallback_values", "return_error", "use_partial"
+
+# JSON Repair Patterns
+json_repair:
+  # Common patterns to fix in LLM responses
+  patterns:
+    - description: "Extract JSON from markdown code blocks"
+      pattern: '```(?:json)?\s*(\{.*?\})\s*```'
+      replacement: '$1'
+    
+    - description: "Remove leading/trailing text before JSON"
+      pattern: '^[^{]*(\{.*\})[^}]*$'
+      replacement: '$1'
+    
+    - description: "Fix unescaped quotes in strings"
+      pattern: '(?<!\\)"(?=[^"]*"[^"]*$)'
+      replacement: '\\"'
+    
+    - description: "Fix trailing commas before closing braces"
+      pattern: ',(\s*})'
+      replacement: '$1'
+    
+    - description: "Fix trailing commas before closing brackets"
+      pattern: ',(\s*])'
+      replacement: '$1'
+    
+    - description: "Fix missing quotes around property names"
+      pattern: '([a-zA-Z_][a-zA-Z0-9_]*)(\s*:)'
+      replacement: '"$1"$2'
+    
+    - description: "Fix single quotes to double quotes"
+      pattern: "'"
+      replacement: '"'
+    
+    - description: "Remove comments from JSON"
+      pattern: '//.*$'
+      replacement: ''
+    
+    - description: "Remove multi-line comments from JSON"
+      pattern: '/\*.*?\*/'
+      replacement: ''
+  
+  # Maximum repair attempts
+  max_repair_attempts: 3
+
+# Performance Settings
+performance:
+  # Enable caching of schema validation results
+  enable_validation_cache: true
+  
+  # Cache TTL in seconds
+  cache_ttl: 3600
+  
+  # Maximum cache size (number of entries)
+  max_cache_size: 1000
+  
+  # Enable parallel validation for multiple schemas
+  enable_parallel_validation: false

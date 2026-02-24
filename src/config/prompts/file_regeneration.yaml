@@ -1,0 +1,149 @@
+metadata:
+  name: file_regeneration
+  version: 2.0.0
+  description: Regenerate source files
+  category: utility
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - utility
+placeholders:
+  required:
+  - adaptation_notes
+  - build_output
+  - container_environment
+  - current_content
+  - dependency_info
+  - error_logs
+  - error_message
+  - file_name
+  - file_type
+  - framework_adaptation_used
+  - framework_type
+  - is_protocol_level
+  - java_version
+  - package_name
+  - package_version
+  - protocol_type
+  - related_files
+  - source_framework
+  - version_guidance
+  optional:
+  - vulnerability_type
+  - cwe_ids
+template: "You are an expert Java developer and DevOps engineer. Your task is to fix\
+  \ a problematic file by regenerating its corrected version.\n\n## File Information\n\
+  **File Name**: ${{ file_name }}\n**File Type**: ${{ file_type }}\n\n## Error Context\n\
+  **Error Message**:\n${{ error_message }}\n\n**Error Logs**:\n${{ error_logs }}\n\
+  \n**Full Build Output**:\n${{ build_output }}\n\n**Dependency Information**:\n\
+  ${{ dependency_info }}\n\n**Package**: ${{ package_name }}\n**Package Version**:\
+  \ ${{ package_version }}\n**Framework**: ${{ framework_type }}\n**Framework Adaptation**:\
+  \ ${{ framework_adaptation_used }}\n**Adapted From**: ${{ source_framework }}\n\
+  **Adaptation Notes**: ${{ adaptation_notes }}\n**Java Version**: ${{ java_version\
+  \ }}\n**Protocol-Level Vulnerability**: ${{ is_protocol_level }}\n**Protocol Type**:\
+  \ ${{ protocol_type }}\n\n**Container Environment**:\n${{ container_environment }}\n\n**Related\
+  \ Files**:\n${{ related_files }}\n\n## Current File Content\n```\n${{ current_content\
+  \ }}\n```\n\n## Analysis Required\nBefore generating the fix, analyze:\n1. **Root\
+  \ cause** of the error from the build output and dependency information\n2. **Version\
+  \ compatibility** between the package version and framework\n3. **API changes**\
+  \ that might have occurred between versions\n4. **Missing dependencies** or version\
+  \ conflicts\n5. **Environment-specific** issues from container context\n\n## ⚠️⚠️⚠️\
+  \ CRITICAL: VERSION-SPECIFIC API REQUIREMENTS ⚠️⚠️⚠️\n\n${{ version_guidance }}\n\
+  \n**YOU MUST USE THE EXACT CODE PATTERNS ABOVE. Using wrong APIs will cause compilation\
+  \ failures.**\n\n**CRITICAL**: You are fixing code for ${{ package_name }} version\
+  \ ${{ package_version }}.\n\n### Struts Version API Rules:\n\n**If version is 6.x\
+  \ or higher** (${{ package_version }} starts with \"6\"):\n- ✅ MUST import: `import\
+  \ org.apache.struts2.dispatcher.HttpParameters;`\n- ✅ MUST import: `import org.apache.struts2.dispatcher.Parameter;`\n\
+  - ✅ MUST import: `import org.apache.struts2.dispatcher.multipart.UploadedFile;`\n\
+  - ✅ MUST use: `HttpParameters params = ActionContext.getContext().getParameters();`\
+  \ (NOT Map!)\n- ✅ MUST use: `private UploadedFile upload;` (NOT File!)\n- ✅ Read\
+  \ parameters: `Parameter p = params.get(\"name\"); String value = p.getValue();`\n\
+  - ❌ NEVER: `Map<String, Object> params = ...getParameters()` (compilation error:\
+  \ incompatible types!)\n- ❌ NEVER: `params.put(...)` (HttpParameters is immutable!)\n\
+  - ❌ NEVER: `private File upload` (compilation error in 6.x!)\n- ❌ NEVER: `import\
+  \ java.io.File` for file uploads (use UploadedFile!)\n\n**If version is 2.5.x or\
+  \ 5.x** (${{ package_version }} starts with \"2.5\" or \"5\"):\n- ✅ Use: `Map<String,\
+  \ Object> params = ActionContext.getContext().getParameters();`\n- ✅ Use: `private\
+  \ File upload;`\n- ✅ Can modify: `params.put(...)`\n- ✅ Import: `import java.io.File;`\n\
+  \n**If version is 2.0.x - 2.4.x** (${{ package_version }} starts with \"2.0\" through\
+  \ \"2.4\"):\n- ✅ Use: `private File upload;`\n- ✅ Use simpler parameter access patterns\n\
+  - ✅ XML-only configuration (no @Action annotations)\n\n### Spring Version API Rules:\n\
+  \n**If package contains \"springframework\" and version is 6.x or higher**:\n- ✅\
+  \ Use: `jakarta.*` imports (NOT javax.*)\n- ✅ Example: `import jakarta.servlet.http.HttpServletRequest;`\n\
+  - ✅ Requires Java 17+\n- ❌ NEVER: `javax.*` imports (compilation error in Spring\
+  \ 6.x!)\n\n**If package contains \"springframework\" and version is 5.x or lower**:\n\
+  - ✅ Use: `javax.*` imports\n- ✅ Example: `import javax.servlet.http.HttpServletRequest;`\n\
+  - ✅ Java 11 or lower\n\n## VULNERABILITY PRESERVATION DURING ERROR RECOVERY\n\n\
+  **Vulnerability Type**: ${{ vulnerability_type }}\n**CWE IDs**: ${{ cwe_ids }}\n\
+  \nIf CWE IDs are specified, this is vulnerable code. When fixing compilation errors:\n\
+  \n1. **Fix only API compatibility issues** - update imports, types, method signatures\
+  \ for the target version\n2. **Preserve vulnerability logic** - don't add validation\
+  \ or security checks\n3. **Use portable paths** - /tmp/ prefix for any file operations\
+  \ (always writable in containers)\n4. **Don't change the attack mechanism** - keep\
+  \ the vulnerability pattern identical to the original code\n\nRead the error logs\
+  \ to identify API mismatches, then apply version-specific API fixes from the VERSION-SPECIFIC\
+  \ API REQUIREMENTS section above.\n\n### Compilation Error Pattern Matching:\n\n\
+  **If you see**: \"incompatible types: org.apache.struts2.dispatcher.HttpParameters\
+  \ cannot be converted to java.util.Map\"\n→ **Fix**: Change `Map<String, Object>\
+  \ params = ActionContext.getContext().getParameters()` to `HttpParameters params\
+  \ = ActionContext.getContext().getParameters()`\n→ **Add imports**: `import org.apache.struts2.dispatcher.HttpParameters;`\
+  \ and `import org.apache.struts2.dispatcher.Parameter;`\n\n**If you see**: \"cannot\
+  \ find symbol: class UploadedFile\"\n→ **Fix**: Add import `import org.apache.struts2.dispatcher.multipart.UploadedFile;`\n\
+  \n**If you see**: \"cannot find symbol: variable ActionContext\"\n→ **Fix**: Add\
+  \ import `import com.opensymphony.xwork2.ActionContext;`\n\n**If you see**: \"package\
+  \ javax.servlet does not exist\" (in Spring 6.x project)\n→ **Fix**: Change all\
+  \ `javax.*` imports to `jakarta.*`\n\n### Before Generating Fix:\n\n1. **Identify\
+  \ version from ${{ package_version }}**: Extract major version (e.g., \"6\" from\
+  \ \"6.2.0\")\n2. **Match error pattern**: Read ${{ error_logs }} to identify which\
+  \ API mismatch occurred\n3. **Select correct API rules**: Use the appropriate section\
+  \ above based on version\n4. **Check all imports**: Ensure imports match the version\
+  \ rules\n5. **Generate fix**: Apply the correct APIs for this version\n6. **Validate\
+  \ types**: Ensure all variable types match method return types for this version\n\
+  7. **Preserve vulnerability demonstration**: If this is vulnerable code (check CWE\
+  \ IDs), ensure the fix maintains the vulnerable behavior while fixing compilation\
+  \ errors\n\n## Task\nGenerate the corrected version of this file that fixes the\
+  \ errors shown above.\n\n## Guidelines\n1. **Fix the specific errors** mentioned\
+  \ in the error logs and build output\n2. **Address version compatibility** issues\
+  \ based on dependency information\n3. **Preserve the original structure** and functionality\
+  \ where possible\n4. **Use appropriate syntax** for the file type and framework\
+  \ version\n5. **Ensure compatibility** with the specific package and framework versions\
+  \ listed\n6. **Handle environment-specific** requirements from container context\n\
+  7. **PRESERVE framework-specific patterns** if this file was framework-adapted:\n\
+  \   - Keep framework annotations (e.g., @Action, @RestController, @Path, @Result)\n\
+  \   - Keep framework class hierarchies (e.g., extends ActionSupport, implements\
+  \ HttpServlet)\n   - Only fix compilation errors, don't remove framework patterns\n\
+  \   - If error is \"package X.annotation does not exist\", the issue is MISSING\
+  \ DEPENDENCY, not bad code\n   - Don't simplify or remove framework-specific code\
+  \ - it's intentional!\n7a. **PROTOCOL-LEVEL VULNERABILITIES** (if is_protocol_level\
+  \ = True):\n   - DO NOT add Spring Boot annotations (@RestController, @SpringBootApplication,\
+  \ etc.)\n   - DO NOT import Spring framework classes\n   - USE standalone protocol\
+  \ server patterns (e.g., Undertow.builder(), plain HTTP/2 servers)\n   - The protocol_type\
+  \ field indicates which protocol (http2, websocket, kafka, etc.)\n   - Protocol\
+  \ servers should NOT depend on Spring Boot - they use the raw protocol library\n\
+  \   - If you see Spring Boot imports in error logs, REMOVE them and use standalone\
+  \ server code\n8. **PRESERVE vulnerability demonstration** if CWE IDs are\
+  \ specified:\n   - Keep the vulnerable code patterns (e.g., lack of input validation,\
+  \ path traversal acceptance)\n   - Only fix compilation errors and API compatibility\
+  \ issues\n   - DO NOT add security fixes or input validation - the code is intentionally\
+  \ vulnerable\n   - Ensure file upload code saves files to /tmp/uploads/ for portability\n\
+  9. **Return ONLY the corrected file content** - no explanations or markdown\n\n\
+  ## Common Issues to Fix\n- **Java compilation errors**: missing imports, wrong method\
+  \ signatures, API incompatibilities\n- **Checked exception handling**: legacy libraries\
+  \ often require try-catch blocks for exceptions\n- **API version compatibility**:\
+  \ older library versions may have different method signatures\n- **Maven dependency\
+  \ conflicts**: version mismatches in pom.xml\n- **Container build issues**: incorrect\
+  \ Dockerfile syntax or commands\n- **Missing package declarations**: incorrect or\
+  \ missing package statements\n- **Framework-specific API usage**: Spring, Jackson,\
+  \ or other framework API changes\n\n## Java-Specific Fixes\n- **Checked Exceptions**:\
+  \ If you see \"unreported exception must be caught or declared\", wrap the code\
+  \ in try-catch\n- **Method Signatures**: For old libraries, check if methods throw\
+  \ checked exceptions vs unchecked\n- **API Changes**: Some older library versions\
+  \ use different method names (e.g., `opt()` vs `get()`)\n- **Import Statements**:\
+  \ Ensure all required imports are present for exceptions and classes used\n\n##\
+  \ Important Notes\n- **For Java files**: Always handle checked exceptions properly\
+  \ with try-catch or throws declaration\n- **For pom.xml files**: Use exact dependency\
+  \ versions that are compatible with each other\n- **For Container files**: Use correct\
+  \ base images and validate all commands\n- **Version compatibility**: Pay attention\
+  \ to library version numbers in dependencies for API compatibility\n\nGenerate the\
+  \ corrected file content:\n"
+examples: []

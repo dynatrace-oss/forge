@@ -1,0 +1,51 @@
+# Kafka Protocol Configuration
+# Used for Kafka CVEs requiring client/producer/consumer configuration
+#
+# This config is automatically included when protocol_type = "Kafka" or "Kafka Protocol"
+# Additional producer.properties and consumer.properties files are included based on kafka_role
+
+kafka:
+  bootstrap-servers: {{ kafka_bootstrap_servers | default("localhost:9092") }}
+
+  producer:
+    # Acknowledgment mode (set to "all" for durability CVEs, "0" for async CVEs)
+    acks: {{ kafka_producer_acks | default("all") }}
+
+    # Retry configuration (high retries may trigger duplicate message CVEs)
+    retries: {{ kafka_producer_retries | default(3) }}
+
+    # Batching configuration
+    batch-size: {{ kafka_batch_size | default(16384) }}
+    linger-ms: {{ kafka_linger_ms | default(1) }}
+    buffer-memory: {{ kafka_buffer_memory | default(33554432) }}
+
+    # Request size (set to unlimited for payload size CVEs)
+    max-request-size: {{ kafka_max_request_size | default(1048576) }}
+
+    # Compression (set to vulnerable codec for compression CVEs: gzip, snappy, lz4, zstd)
+    compression-type: {{ kafka_compression_type | default("none") }}
+
+  consumer:
+    # Consumer group configuration
+    group-id: {{ kafka_consumer_group | default("vuln-consumer-group") }}
+
+    # Offset management (disable for offset manipulation CVEs)
+    auto-offset-reset: {{ kafka_auto_offset_reset | default("earliest") }}
+    enable-auto-commit: {{ kafka_enable_auto_commit | default(true) }}
+
+    # Polling configuration
+    max-poll-records: {{ kafka_max_poll_records | default(500) }}
+    fetch-min-size: {{ kafka_fetch_min_size | default(1) }}
+    fetch-max-wait-ms: {{ kafka_fetch_max_wait | default(500) }}
+
+  # Vulnerability-specific settings
+  topics:
+    input: {{ kafka_input_topic | default("vuln-input") }}
+    output: {{ kafka_output_topic | default("vuln-output") }}
+
+# Comments for LLM code generation:
+# - Set max_request_size to unlimited (Integer.MAX_VALUE) for payload size CVEs
+# - Set enable_auto_commit to false for consumer offset manipulation CVEs
+# - Set compression_type to vulnerable codec for compression CVEs
+# - Set acks to "0" for async fire-and-forget CVEs that may lose messages
+# - Use custom serializers/deserializers for deserialization CVEs

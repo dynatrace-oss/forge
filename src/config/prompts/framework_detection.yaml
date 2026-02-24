@@ -1,0 +1,66 @@
+metadata:
+  name: framework_detection
+  version: 2.0.0
+  description: Detect Java framework from code
+  category: framework
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - framework
+placeholders:
+  required:
+  - cve_id
+  - dependency_context
+  - description
+  - package_name
+  - package_version
+  - references
+  - similar_examples
+  - summary
+  optional: []
+template: "# Framework Detection and Analysis Prompt\n\nYou are an expert Java application\
+  \ architect and security researcher. Your task is to analyze vulnerability information\
+  \ and determine the most appropriate framework type and application structure for\
+  \ demonstrating the vulnerability.\n\n## Vulnerability Information:\n- CVE ID: {{\
+  \ cve_id }}\n- Package: {{ package_name }} {{ package_version }}\n- Summary: {{\
+  \ summary }}\n- Description: {{ description }}\n- References: {{ references }}\n\
+  \n## Additional Context:\n{{ dependency_context }}\n\n{{ similar_examples }}\n\n\
+  ## Analysis Required:\nAnalyze the provided information and determine:\n\n1. **Framework\
+  \ Type**: Which framework would best demonstrate this vulnerability?\n   - spring-boot:\
+  \ For web applications, REST APIs, dependency injection vulnerabilities\n   - struts:\
+  \ For action-based web applications, OGNL injection vulnerabilities\n   - jenkins:\
+  \ For Jenkins plugin vulnerabilities, CI/CD related issues\n   - standalone: For\
+  \ library-level vulnerabilities, utility functions, simple demos\n\n2. **Application\
+  \ Architecture**: What type of application structure is needed?\n   - web-application:\
+  \ HTTP endpoints, controllers, web-based vulnerabilities\n   - console-application:\
+  \ Command-line tools, batch processing vulnerabilities\n   - service-application:\
+  \ Background services, message processing vulnerabilities\n   - plugin-application:\
+  \ Extensions, add-ons, plugin-based vulnerabilities\n\n3. **Complexity Level**:\
+  \ How complex should the demonstration be?\n   - minimal: Single class, basic demonstration\n\
+  \   - moderate: Multiple classes, realistic but simple application\n   - comprehensive:\
+  \ Full application structure, multiple endpoints/features\n\n## Output Format:\n\
+  Provide your analysis in JSON format:\n\n```json\n{\n    \"framework_type\": \"\
+  spring-boot|struts|jenkins|standalone\",\n    \"architecture_type\": \"web-application|console-application|service-application|plugin-application\"\
+  ,\n    \"complexity_level\": \"minimal|moderate|comprehensive\",\n    \"rationale\"\
+  : \"Explanation of why this framework and architecture were chosen\",\n    \"key_components\"\
+  : [\n        \"List of main components needed for the demonstration\"\n    ],\n\
+  \    \"vulnerability_focus\": \"Specific aspect of the framework that makes the\
+  \ vulnerability exploitable\",\n    \"recommended_endpoints\": [\n        \"List\
+  \ of HTTP endpoints or entry points needed\"\n    ],\n    \"required_dependencies\"\
+  : [\n        {\n            \"group_id\": \"org.springframework.boot\",\n      \
+  \      \"artifact_id\": \"spring-boot-starter-web\",\n            \"version\": \"\
+  2.7.0\",\n            \"purpose\": \"Web framework for HTTP endpoints\"\n      \
+  \  }\n    ],\n    \"configuration_needs\": [\n        \"List of configuration files\
+  \ or settings required\"\n    ]\n}\n```\n\n## Decision Criteria:\n\n### For Spring\
+  \ Boot:\n- Web-based vulnerabilities (XSS, CSRF, injection attacks)\n- REST API\
+  \ vulnerabilities\n- Dependency injection or configuration issues\n- Modern Java\
+  \ web application vulnerabilities\n\n### For Apache Struts:\n- Action-based web\
+  \ application vulnerabilities\n- OGNL injection vulnerabilities (CVE-2017-5638,\
+  \ etc.)\n- Web form processing vulnerabilities\n- Legacy Java web application issues\n\
+  \n### For Jenkins:\n- Plugin-based vulnerabilities\n- CI/CD pipeline security issues\n\
+  - Build process vulnerabilities\n- Jenkins-specific CVEs\n\n### For Standalone:\n\
+  - Library-level vulnerabilities\n- Utility function vulnerabilities\n- Deserialization\
+  \ issues in libraries\n- Simple demonstration needs\n\nProvide detailed reasoning\
+  \ for your framework choice and ensure the selected architecture will effectively\
+  \ demonstrate the specific vulnerability.\n"
+examples: []

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Template for Spring Framework CORE package vulnerabilities -->
+    <!-- CRITICAL: This template is ONLY for testing Spring Framework packages (spring-web, spring-core, etc.) -->
+    <!-- Uses Spring Boot version that naturally includes the target Spring Framework version -->
+    <!-- Then overrides to exact vulnerable version via dependencyManagement -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>{{ spring_boot_version }}</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>org.cve-emulator</groupId>
+    <artifactId>{{ artifact_id }}-spring-framework-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Vulnerability Demo - {{ package_name }} (Spring Framework Native)</name>
+    <description>Spring Boot application demonstrating vulnerability in Spring Framework {{ package_version }}</description>
+
+    <properties>
+        <java.version>{{ java_version }}</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-boot.version>{{ spring_boot_version }}</spring-boot.version>
+        <maven.compiler.source>{{ java_version }}</maven.compiler.source>
+        <maven.compiler.target>{{ java_version }}</maven.compiler.target>
+    </properties>
+
+    <!-- Repositories section for package-specific repositories -->
+    {{ repositories }}
+
+    <!-- CRITICAL: Override Spring Framework version to exact vulnerable version -->
+    <!-- This forces Spring Boot to use the vulnerable version instead of its default -->
+    <!-- IMPORTANT: Import Spring Framework BOM to ensure ALL Spring modules use consistent version -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Import Spring Framework BOM to manage all Spring module versions (core, beans, context, etc.) -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>{{ package_version }}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <!-- These will bring in Spring Framework dependencies, but version is overridden above -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <!-- NO explicit version - managed by parent and overridden by dependencyManagement -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- JSON processing for REST APIs -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+
+        <!-- Validation for request handling -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- IMPORTANT: DO NOT add {{ package_name }} as explicit dependency -->
+        <!-- It is already included via spring-boot-starter-web with overridden version -->
+        <!-- Adding additional dependencies from LLM-generated code (if any) -->
+        {{ dependencies }}
+
+        <!-- Development tools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Configuration processor -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Testing dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>{{ artifact_id }}-${project.version}</finalName>
+
+        <plugins>
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>{{ main_class }}</mainClass>
+                    <layout>JAR</layout>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Compiler plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire plugin for testing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>false</skipTests>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- Dependency plugin for analyzing dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Profiles for different deployment scenarios -->
+    <profiles>
+        <!-- Development profile -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profiles.active>dev,vulnerability-demo</spring.profiles.active>
+                <logging.level.org.springframework>DEBUG</logging.level.org.springframework>
+                <server.port>8080</server.port>
+            </properties>
+        </profile>
+
+        <!-- Container profile for Docker deployment -->
+        <profile>
+            <id>container</id>
+            <properties>
+                <spring.profiles.active>container,vulnerability-demo</spring.profiles.active>
+                <server.port>8080</server.port>
+                <management.endpoints.web.exposure.include>health,info,metrics,env</management.endpoints.web.exposure.include>
+            </properties>
+        </profile>
+
+        <!-- Security disabled profile for vulnerability testing -->
+        <profile>
+            <id>vulnerability-testing</id>
+            <properties>
+                <spring.profiles.active>vulnerability-testing</spring.profiles.active>
+                <spring.autoconfigure.exclude>org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration</spring.autoconfigure.exclude>
+                <management.security.enabled>false</management.security.enabled>
+            </properties>
+        </profile>
+    </profiles>
+</project>

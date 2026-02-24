@@ -1,0 +1,74 @@
+metadata:
+  name: template_customization
+  version: 2.0.0
+  description: Customize container template
+  category: container
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - container
+  - deployment
+placeholders:
+  required:
+  - base_template
+  - customization_requirements
+  - existing_dependencies
+  - framework_type
+  - package_name
+  - package_version
+  - vulnerability_description
+  - vulnerability_type
+  optional: []
+template: "You are a Maven POM template customization expert. Your task is to customize\
+  \ a base Maven POM template for a specific vulnerability package and framework combination\
+  \ to create an optimal build configuration.\n\n## Context Information\n**Framework\
+  \ Type**: ${{ framework_type }}\n**Package Name**: ${{ package_name }}\n**Package\
+  \ Version**: ${{ package_version }}\n**Vulnerability Type**: ${{ vulnerability_type\
+  \ }}\n**Vulnerability Description**: ${{ vulnerability_description }}\n\n## Base\
+  \ Template\n${{ base_template }}\n\n## Existing Dependencies\n${{ existing_dependencies\
+  \ }}\n\n## Customization Requirements\n${{ customization_requirements }}\n\n## Instructions\n\
+  \n1. **Analyze the Context**: Review the vulnerability package, framework type,\
+  \ and base template to understand the requirements.\n\n2. **Customize the Template**:\
+  \ Modify the base template to:\n   - Optimize dependencies for the specific vulnerability\
+  \ demonstration\n   - Add framework-specific configurations and plugins\n   - Include\
+  \ appropriate repositories if needed\n   - Set correct packaging type (jar, war,\
+  \ etc.) based on framework\n   - Configure build plugins for the target framework\n\
+  \   - Add any framework-specific properties\n\n3. **Framework-Specific Guidelines**:\n\
+  \   - **Spring Boot**: Use spring-boot-starter-parent, add spring-boot-maven-plugin,\
+  \ set jar packaging\n   - **Apache Struts**: Use servlet-api, add maven-war-plugin,\
+  \ set war packaging, include web.xml configuration\n   - **Micronaut**: Add micronaut-bom,\
+  \ configure micronaut-maven-plugin, optimize for compile-time DI\n   - **Quarkus**:\
+  \ Use quarkus-bom, add quarkus-maven-plugin, optimize for native compilation\n \
+  \  - **Standalone JAR**: Keep minimal dependencies, use standard jar packaging\n\
+  \n4. **Dependency Optimization**:\n   - Remove unnecessary dependencies\n   - Add\
+  \ missing dependencies required for vulnerability demonstration\n   - Ensure version\
+  \ compatibility\n   - Include testing dependencies if appropriate\n\n5. **Build\
+  \ Configuration**:\n   - Configure appropriate Java version\n   - Add necessary\
+  \ build plugins\n   - Set up resource filtering if needed\n   - Configure main class\
+  \ if applicable\n\n## Output Format\n\nProvide your response in the following JSON\
+  \ format:\n\n```json\n{\n  \"customized_template\": \"<!-- Complete customized POM\
+  \ XML content -->\",\n  \"changes_made\": [\n    \"List of specific changes made\
+  \ to the template\",\n    \"Each change should be descriptive and specific\"\n \
+  \ ],\n  \"dependencies_added\": [\n    {\n      \"group_id\": \"com.example\",\n\
+  \      \"artifact_id\": \"example-lib\",\n      \"version\": \"1.0.0\",\n      \"\
+  scope\": \"compile\",\n      \"reason\": \"Required for vulnerability demonstration\"\
+  \n    }\n  ],\n  \"dependencies_removed\": [\n    {\n      \"group_id\": \"com.example\"\
+  ,\n      \"artifact_id\": \"unused-lib\",\n      \"reason\": \"Not needed for this\
+  \ framework/vulnerability combination\"\n    }\n  ],\n  \"configuration_files\"\
+  : {\n    \"application.properties\": \"# Framework configuration\\nserver.port=8080\"\
+  ,\n    \"web.xml\": \"<?xml version=\\\"1.0\\\"?><!-- Web application descriptor\
+  \ -->\"\n  },\n  \"framework_files\": {\n    \"struts.xml\": \"<?xml version=\\\"\
+  1.0\\\"?><!-- Struts configuration -->\",\n    \"spring-config.xml\": \"<?xml version=\\\
+  \"1.0\\\"?><!-- Spring configuration -->\"\n  },\n  \"build_optimizations\": [\n\
+  \    \"Description of build optimizations applied\",\n    \"Performance improvements\
+  \ made\"\n  ],\n  \"vulnerability_specific_notes\": [\n    \"Notes about vulnerability-specific\
+  \ customizations\",\n    \"Special considerations for this vulnerability type\"\n\
+  \  ]\n}\n```\n\n## Requirements\n\n- Ensure the POM is valid XML\n- All dependencies\
+  \ must have valid group_id, artifact_id, and version\n- Framework-specific configurations\
+  \ must be appropriate\n- The template should be optimized for vulnerability demonstration\n\
+  - Include necessary plugins for the target framework\n- Maintain compatibility with\
+  \ the vulnerability package\n- Consider security implications (this is for controlled\
+  \ vulnerability demonstration)\n\nFocus on creating a working, optimized Maven build\
+  \ configuration that will successfully compile and run the vulnerability demonstration\
+  \ in the target framework environment."
+examples: []

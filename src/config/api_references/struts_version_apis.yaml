@@ -1,0 +1,186 @@
+# Apache Struts Version-Specific API Reference
+# Used for generating version-appropriate code
+
+struts:
+  # Struts 6.0-6.3 (2023) - Uses old File-based API (UploadedFilesAware not yet available)
+  "6.0-6.3":
+    description: "Struts 6.0-6.3 with traditional File upload API"
+    file_upload:
+      type: "java.io.File"
+      imports:
+        - "java.io.File"
+        - "java.io.FileInputStream"
+        - "java.io.InputStream"
+      example: |
+        // CORRECT Struts 6.0-6.3 file upload pattern (File-based, NO UploadedFile!)
+        import com.opensymphony.xwork2.ActionSupport;
+        import java.io.File;
+        import java.io.FileInputStream;
+        import java.io.InputStream;
+
+        public class FileUploadAction extends ActionSupport {
+            // CRITICAL: Use java.io.File type (NOT UploadedFile!)
+            private File upload;
+            private String uploadContentType;
+            private String uploadFileName;
+
+            // Setter for File (NOT UploadedFile!)
+            public void setUpload(File upload) {
+                this.upload = upload;
+            }
+
+            public void setUploadContentType(String uploadContentType) {
+                this.uploadContentType = uploadContentType;
+            }
+
+            public void setUploadFileName(String uploadFileName) {
+                this.uploadFileName = uploadFileName;
+            }
+
+            public String execute() throws Exception {
+                if (upload != null) {
+                    InputStream input = new FileInputStream(upload);
+                    // Process file using uploadFileName...
+                    return SUCCESS;
+                }
+                return ERROR;
+            }
+        }
+
+    parameters:
+      type: "org.apache.struts2.dispatcher.HttpParameters"
+      mutability: "immutable"
+      imports:
+        - "org.apache.struts2.dispatcher.HttpParameters"
+        - "org.apache.struts2.dispatcher.Parameter"
+      example: |
+        HttpParameters params = ActionContext.getContext().getParameters();
+        Parameter p = params.get("paramName");
+        String value = p.getValue();
+
+    critical_warnings:
+      - "For file uploads, use File type with setUpload(File) setter"
+      - "Struts provides three parameters: upload (File), uploadContentType (String), uploadFileName (String)"
+      - "NEVER use Map<String, Object> for parameters - use HttpParameters"
+      - "HttpParameters is IMMUTABLE - cannot use .put() or .set()"
+      - "NO @Action annotations - rely on struts.xml for action mapping"
+
+    required_imports:
+      - "com.opensymphony.xwork2.ActionSupport"
+      - "java.io.File"
+      - "java.io.FileInputStream"
+      - "java.io.InputStream"
+
+  # Struts 6.4+ (2024+) - New UploadedFilesAware interface introduced
+  "6.4":
+    description: "Struts 6.4+ with UploadedFilesAware interface (NOT setters!)"
+    file_upload:
+      interface: "org.apache.struts2.action.UploadedFilesAware"
+      type: "org.apache.struts2.dispatcher.multipart.UploadedFile"
+      imports:
+        - "org.apache.struts2.action.UploadedFilesAware"
+        - "org.apache.struts2.dispatcher.multipart.UploadedFile"
+        - "java.util.List"
+        - "java.io.InputStream"
+      example: |
+        // CORRECT Struts 6.4+ file upload pattern
+        public class FileUploadAction extends ActionSupport implements UploadedFilesAware {
+            private UploadedFile uploadedFile;
+
+            @Override
+            public void withUploadedFiles(List<UploadedFile> uploadedFiles) {
+                if (!uploadedFiles.isEmpty()) {
+                    this.uploadedFile = uploadedFiles.get(0);
+                }
+            }
+
+            public String execute() {
+                if (uploadedFile != null) {
+                    InputStream content = uploadedFile.getContent();
+                    String fileName = uploadedFile.getName();
+                    // Process file...
+                    return SUCCESS;
+                }
+                return ERROR;
+            }
+        }
+
+    parameters:
+      type: "org.apache.struts2.dispatcher.HttpParameters"
+      mutability: "immutable"
+      imports:
+        - "org.apache.struts2.dispatcher.HttpParameters"
+        - "org.apache.struts2.dispatcher.Parameter"
+      example: |
+        HttpParameters params = ActionContext.getContext().getParameters();
+        Parameter p = params.get("paramName");
+        String value = p.getValue();
+
+    critical_warnings:
+      - "MUST implement UploadedFilesAware interface for file uploads"
+      - "NEVER use setUpload(File) or setUpload(InputStream) - those are old APIs"
+      - "NEVER use Map<String, Object> for parameters - use HttpParameters"
+      - "HttpParameters is IMMUTABLE - cannot use .put() or .set()"
+      - "Use withUploadedFiles(List<UploadedFile>) method, NOT setters"
+      - "NO @Action annotations - rely on struts.xml for action mapping"
+
+    required_imports:
+      - "com.opensymphony.xwork2.ActionSupport"
+      - "org.apache.struts2.action.UploadedFilesAware"
+      - "org.apache.struts2.dispatcher.multipart.UploadedFile"
+      - "java.util.List"
+      - "java.io.InputStream"
+
+  # Struts 2.5.x and 5.x (2015-2023) - Modern but pre-6.x
+  "2.5":
+    description: "Struts 2.5.x/5.x with traditional File and Map APIs"
+    file_upload:
+      type: "java.io.File"
+      import: "java.io.File"
+      setter_param: "File"
+      example: |
+        private File upload;
+        public void setUpload(File upload) { this.upload = upload; }
+        // Access: upload.length(), new FileInputStream(upload)
+
+    parameters:
+      type: "Map<String, Object>"
+      mutability: "mutable"
+      imports:
+        - "java.util.Map"
+      example: |
+        Map<String, Object> params = ActionContext.getContext().getParameters();
+        params.put("key", "value");  // Allowed in 2.5.x
+
+    required_imports:
+      - "com.opensymphony.xwork2.ActionSupport"
+      - "com.opensymphony.xwork2.ActionContext"
+      - "java.io.File"
+      - "java.util.Map"
+
+  # Struts 2.0.x - 2.4.x (2006-2015) - Legacy versions
+  "2.0-2.4":
+    description: "Struts 2.0.x-2.4.x legacy versions (XML-only config)"
+    file_upload:
+      type: "java.io.File"
+      import: "java.io.File"
+      setter_param: "File"
+      example: |
+        private File upload;
+        public void setUpload(File upload) { this.upload = upload; }
+
+    parameters:
+      type: "Map<String, Object>"
+      mutability: "mutable"
+      imports:
+        - "java.util.Map"
+      example: |
+        Map<String, Object> params = ActionContext.getContext().getParameters();
+
+    notes:
+      - "XML-only configuration (no @Action annotations)"
+      - "Simpler parameter access patterns"
+
+    required_imports:
+      - "com.opensymphony.xwork2.ActionSupport"
+      - "java.io.File"

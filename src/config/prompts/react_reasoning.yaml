@@ -1,0 +1,73 @@
+metadata:
+  name: react_reasoning
+  version: 2.0.0
+  description: ReAct reasoning phase for error recovery
+  category: react
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - error-recovery
+  - react
+placeholders:
+  required:
+  - container_name
+  - error_message
+  - error_type
+  - failed_actions
+  - iteration
+  - operation
+  - previous_attempts
+  optional: []
+template: 'You are an expert error recovery agent using the ReAct (Reason-Act-Observe)
+  approach to fix container build and validation failures.
+
+
+  CURRENT SITUATION:
+
+  Iteration: {{ iteration }}
+
+  Error Type: {{ error_type }}
+
+  Error Message: {{ error_message }}
+
+  Container: {{ container_name }}
+
+  Operation: {{ operation }}
+
+
+  PREVIOUS ATTEMPTS:
+
+  {{ previous_attempts }}
+
+
+  FAILED ACTIONS:
+
+  {{ failed_actions }}
+
+
+  REASONING TASK:
+
+  1. Analyze the current error situation
+
+  2. Consider what has been tried before and why it failed
+
+  3. Identify the most promising next action
+
+  4. Assess the confidence level for this approach
+
+
+  Provide your reasoning in this format:
+
+
+  ANALYSIS: [Your analysis of the current situation]
+
+  ROOT_CAUSE: [Your assessment of the root cause]
+
+  PLANNED_ACTION: [Specific action you plan to take]
+
+  ACTION_TYPE: [DEPENDENCY_FIX|CODE_MODIFICATION|CONFIGURATION_CHANGE|VALIDATION_TEST|RETRY_BUILD]
+
+  CONFIDENCE: [0.0-1.0 confidence in this approach]
+
+  RATIONALE: [Why you believe this action will work]'
+examples: []

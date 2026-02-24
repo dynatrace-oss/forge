@@ -1,0 +1,144 @@
+# Supported packages configuration for OSV vulnerability lookup
+# This file defines which packages are supported by the FORGE framework
+
+supported_packages:
+  # Core Java packages
+  "org.yaml:snakeyaml": "Maven"
+  "org.json:json": "Maven"
+
+  # Web frameworks
+  "org.sonarsource.scanner.api:sonar-scanner-api-batch": "Maven"
+  "io.jenkins.lib:support-log-formatter": "Maven"
+
+  # Utilities and libraries
+  "org.eclipse.jetty:jetty-util": "Maven"
+  "net.sf.ehcache:ehcache": "Maven"
+  "net.sf.ehcache:sizeof-agent": "Maven"
+  "com.google.guava:guava": "Maven"
+  "xerces:xercesImpl": "Maven"
+
+  # CDI/Dependency Injection
+  "org.jboss.weld:weld-core-impl": "Maven"
+  "org.jboss.weld:weld-api": "Maven"
+
+  # Logging frameworks
+  "org.apache.logging.log4j:log4j-core": "Maven"
+  "org.apache.logging.log4j:log4j-api": "Maven"
+  "org.apache.log4j:log4j": "Maven"
+
+  # JSON processing
+  "com.fasterxml.jackson.core:jackson-databind": "Maven"
+  "com.fasterxml.jackson.core:jackson-core": "Maven"
+  "com.fasterxml.jackson.core:jackson-annotations": "Maven"
+  "com.alibaba:fastjson": "Maven"
+
+  # Additional serialization libraries
+  "commons-collections:commons-collections": "Maven"
+  "org.apache.commons:commons-collections4": "Maven"
+
+  # Additional logging frameworks
+  "ch.qos.logback:logback-core": "Maven"
+  "ch.qos.logback:logback-classic": "Maven"
+
+  # Spring Framework
+  "org.springframework:spring-core": "Maven"
+  "org.springframework:spring-context": "Maven"
+  "org.springframework:spring-web": "Maven"
+  "org.springframework:spring-webmvc": "Maven"
+  "org.springframework.boot:spring-boot": "Maven"
+  "org.springframework.boot:spring-boot-starter-web": "Maven"
+
+  # Apache Struts
+  "org.apache.struts:struts2-core": "Maven"
+  "org.apache.struts:struts2-convention-plugin": "Maven"
+
+  # Micronaut Framework
+  "io.micronaut:micronaut-core": "Maven"
+  "io.micronaut:micronaut-http": "Maven"
+
+  # Quarkus Framework
+  "io.quarkus:quarkus-core": "Maven"
+  "io.quarkus:quarkus-arc": "Maven"
+
+  # Web Servers (Added for 2023+ CVE research)
+  "org.apache.tomcat.embed:tomcat-embed-core": "Maven"
+  "io.undertow:undertow-core": "Maven"
+
+  # Compression and Utilities (Added for 2023+ CVE research)
+  "org.apache.commons:commons-compress": "Maven"
+
+  # Cryptography (Added for 2023+ CVE research)
+  "org.bouncycastle:bcprov-jdk15on": "Maven"
+
+  # Spring Security (Added for 2023+ CVE research)
+  "org.springframework.security:spring-security-core": "Maven"
+  "org.springframework:spring-expression": "Maven"
+  "org.springframework:spring-beans": "Maven"
+
+  # Database Drivers (Added for 2023+ CVE research)
+  "org.postgresql:postgresql": "Maven"
+  "mysql:mysql-connector-java": "Maven"
+
+  # Messaging and Reactive (Added for 2023+ CVE research)
+  "org.apache.kafka:kafka-clients": "Maven"
+  "io.vertx:vertx-core": "Maven"
+  "io.netty:netty-codec-http": "Maven"
+
+  # Web Services (Added for 2023+ CVE research)
+  "org.apache.cxf:cxf-core": "Maven"
+
+# Packages known to have transitive dependency vulnerabilities
+# These use fallback strategies when direct queries fail
+transitive_vulnerable_packages:
+  - "net.sf.ehcache:ehcache"
+  - "net.sf.ehcache:sizeof-agent"
+  - "org.eclipse.jetty:jetty-util"
+  - "xerces:xercesImpl"
+  - "org.jboss.weld:weld-core-impl"
+  - "org.jboss.weld:weld-api"
+
+# Fallback queries for packages without direct vulnerabilities
+# but affected by transitive dependencies
+package_fallbacks:
+  "net.sf.ehcache:ehcache":
+    - package:
+        name: "com.fasterxml.jackson.core:jackson-databind"
+        ecosystem: "Maven"
+
+  "net.sf.ehcache:sizeof-agent":
+    - package:
+        name: "com.fasterxml.jackson.core:jackson-databind"
+        ecosystem: "Maven"
+
+  "org.eclipse.jetty:jetty-util":
+    - package:
+        name: "org.eclipse.jetty:jetty-server"
+        ecosystem: "Maven"
+    - package:
+        name: "org.eclipse.jetty:jetty-http"
+        ecosystem: "Maven"
+
+  "xerces:xercesImpl":
+    - package:
+        name: "xerces:xerces"
+        ecosystem: "Maven"
+
+  "org.jboss.weld:weld-core-impl":
+    - package:
+        name: "org.jboss.weld:weld-core"
+        ecosystem: "Maven"
+
+  "org.jboss.weld:weld-api":
+    - package:
+        name: "org.jboss.weld:weld-core"
+        ecosystem: "Maven"
+
+# Cross-ecosystem package mappings
+# Maps package names across different ecosystems (e.g., Debian <-> Maven)
+cross_ecosystem_mappings:
+  # Log4j mappings: Debian apache-log4j2 corresponds to Maven log4j-core
+  "apache-log4j2":
+    - "org.apache.logging.log4j:log4j-core"
+    - "org.apache.logging.log4j:log4j-api"
+  "log4j-core":
+    - "org.apache.logging.log4j:log4j-core"

@@ -1,0 +1,44 @@
+# Quarkus Framework Dependencies
+# Core Quarkus dependencies for vulnerability demonstration
+
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-resteasy</artifactId>
+    <version>2.16.12.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-resteasy-jackson</artifactId>
+    <version>2.16.12.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-arc</artifactId>
+    <version>2.16.12.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-vertx-http</artifactId>
+    <version>2.16.12.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-undertow</artifactId>
+    <version>2.16.12.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-smallrye-openapi</artifactId>
+    <version>2.16.12.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>org.jboss.logging</groupId>
+    <artifactId>jboss-logging</artifactId>
+    <version>3.4.3.Final</version>
+</dependency>

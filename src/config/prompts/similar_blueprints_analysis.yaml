@@ -1,0 +1,72 @@
+metadata:
+  name: similar_blueprints_analysis
+  version: 2.0.0
+  description: Analyze similar vulnerability blueprints
+  category: blueprint_management
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - blueprint_management
+placeholders:
+  required:
+  - cve_id
+  - description
+  - package_name
+  - similar_examples
+  - summary
+  optional:
+  - dependency_examples
+  - package_version
+template: "# Similar Blueprint Analysis and Guidance Prompt\n\nYou are an expert vulnerability\
+  \ researcher and code analyst. Your task is to analyze similar vulnerability blueprints\
+  \ and provide guidance for generating improved code based on successful patterns.\n\
+  \n## Current Vulnerability:\n- CVE ID: {{ cve_id }}\n- Package: {{ package_name\
+  \ }} {{ package_version|default(\"\") }}\n- Summary: {{ summary }}\n- Description:\
+  \ {{ description }}\n\n## Similar Blueprint Examples:\n{{ similar_examples }}\n\n\
+  ## Dependency Context:\n{{ dependency_examples|default(\"\") }}\n\n## Analysis Tasks:\n\
+  \n### 1. Pattern Analysis\nAnalyze the provided similar examples and extract:\n\
+  - Common vulnerability patterns\n- Successful code structures\n- Effective demonstration\
+  \ techniques\n- Reusable components and approaches\n\n### 2. Code Quality Assessment\n\
+  Evaluate the similar examples for:\n- Clarity of vulnerability demonstration\n-\
+  \ Code organization and structure\n- Completeness of exploitation examples\n- Documentation\
+  \ and comments quality\n\n### 3. Improvement Opportunities\nIdentify ways to improve\
+  \ upon the similar examples:\n- Missing vulnerability aspects not covered\n- Better\
+  \ code organization approaches\n- More effective exploitation demonstrations\n\n\
+  ## Output Format:\nProvide your analysis in structured format:\n\n### Pattern Summary:\n\
+  ```\nCOMMON PATTERNS IDENTIFIED:\n1. [Pattern 1]: Description and frequency\n2.\
+  \ [Pattern 2]: Description and frequency\n3. [Pattern 3]: Description and frequency\n\
+  \nSUCCESSFUL TECHNIQUES:\n- [Technique 1]: Why it works well\n- [Technique 2]: Why\
+  \ it works well\n- [Technique 3]: Why it works well\n```\n\n### Code Structure Recommendations:\n\
+  ```\nRECOMMENDED STRUCTURE:\n├── Main Application Class\n│   ├── Basic setup and\
+  \ initialization\n│   ├── Vulnerable method/endpoint\n│   └── Demonstration driver\
+  \ code\n├── Supporting Classes (if needed)\n│   ├── Helper utilities\n│   └── Data\
+  \ models\n└── Resources\n    ├── Configuration files\n    └── Test data files\n\n\
+  KEY IMPLEMENTATION POINTS:\n1. [Point 1]: Specific implementation advice\n2. [Point\
+  \ 2]: Specific implementation advice\n3. [Point 3]: Specific implementation advice\n\
+  ```\n\n### Improvement Guidance:\n```\nENHANCEMENTS OVER SIMILAR EXAMPLES:\n1. [Enhancement\
+  \ 1]: Specific improvement and rationale\n2. [Enhancement 2]: Specific improvement\
+  \ and rationale\n3. [Enhancement 3]: Specific improvement and rationale\n\nAVOID\
+  \ THESE ISSUES FROM EXAMPLES:\n- [Issue 1]: What to avoid and why\n- [Issue 2]:\
+  \ What to avoid and why\n- [Issue 3]: What to avoid and why\n```\n\n### Dependency\
+  \ Integration:\n```\nDEPENDENCY UTILIZATION:\nBased on the similar examples, here's\
+  \ how to effectively use dependencies:\n\n1. Core Vulnerability Dependencies:\n\
+  \   - [Dependency]: How it's used in similar examples\n   - [Dependency]: How it's\
+  \ used in similar examples\n\n2. Supporting Dependencies:\n   - [Dependency]: Purpose\
+  \ and integration approach\n   - [Dependency]: Purpose and integration approach\n\
+  \n3. Recommended Additional Dependencies:\n   - [Dependency]: Why it would improve\
+  \ the demonstration\n   - [Dependency]: Why it would improve the demonstration\n\
+  ```\n\n### Specific Code Recommendations:\n```java\n// Based on analysis of similar\
+  \ examples, here are key code patterns:\n\n// Pattern 1: Vulnerability Setup\n[Code\
+  \ snippet showing effective setup approach]\n\n// Pattern 2: Exploitation Demonstration\n\
+  [Code snippet showing clear exploitation]\n\n// Pattern 3: Result Verification\n\
+  [Code snippet showing how to verify successful exploitation]\n```\n\n### Quality\
+  \ Metrics:\nAssess the similar examples on:\n- Vulnerability clarity (1-10): [Score]\
+  \ - [Explanation]\n- Code quality (1-10): [Score] - [Explanation]\n- Educational\
+  \ value (1-10): [Score] - [Explanation]\n- Exploitation effectiveness (1-10): [Score]\
+  \ - [Explanation]\n\n**Target Improvements:**\nBased on this analysis, the new blueprint\
+  \ should achieve:\n- Vulnerability clarity: [Target score] by [specific improvements]\n\
+  - Code quality: [Target score] by [specific improvements]\n- Educational value:\
+  \ [Target score] by [specific improvements]\n- Exploitation effectiveness: [Target\
+  \ score] by [specific improvements]\n\nProvide actionable, specific guidance that\
+  \ leverages the best aspects of similar examples while addressing their limitations.\n"
+examples: []

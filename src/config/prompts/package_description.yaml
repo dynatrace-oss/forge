@@ -1,0 +1,20 @@
+metadata:
+  name: package_description
+  version: 2.0.0
+  description: Generate package description
+  category: utility
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - utility
+placeholders:
+  required:
+  - package_key
+  optional: []
+template: 'Provide a brief, professional description for the Java package: {{ package_key
+  }}
+
+  Format: "Package Name - Brief description of its purpose and use case"
+
+  Keep it concise (1-2 lines) and focus on the main functionality.'
+examples: []
