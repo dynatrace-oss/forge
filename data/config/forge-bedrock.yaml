@@ -1,0 +1,82 @@
+# Bedrock provider config — mixed model routing for cost efficiency.
+# Sonnet 4.6: generator, exploit, planner, detector (reasoning-heavy)
+# Llama 4 Maverick: intel, oracle critic (data gathering / focused judgment)
+
+agents:
+  intel:
+    model: "bedrock/us.meta.llama4-maverick-17b-instruct-v1:0"
+    max_turns: 10
+    temperature: 0.0
+    prompt_template: "agents/intel"
+  generator:
+    model: "bedrock/us.anthropic.claude-sonnet-4-6"
+    max_turns: 5
+    temperature: 0.2
+    max_tokens: 16384
+    max_generation_attempts: 3
+    prompt_template: "agents/generator"
+  planner:
+    model: "bedrock/us.anthropic.claude-sonnet-4-6"
+    max_turns: 5
+    temperature: 0.0
+    prompt_template: "agents/planner"
+  exploit:
+    model: "bedrock/us.anthropic.claude-sonnet-4-6"
+    max_turns: 20
+    temperature: 0.0
+    max_tokens: 16384
+    prompt_template: "agents/exploit"
+  detector:
+    model: "bedrock/us.anthropic.claude-sonnet-4-6"
+    max_turns: 15
+    temperature: 0.0
+    prompt_template: "agents/detector"
+    max_continues: 2
+    max_nudges: 1
+
+base_agent:
+  max_nudges: 2
+  max_continues: 5
+  nudge_message: "You MUST use your tools to make progress. Do not respond with text — call a tool."
+  continue_message: "Continue working on the task. Use your tools to make progress."
+  final_json_message: "Provide your final assessment as JSON with the required fields."
+
+sandbox:
+  health_check_retries: 3
+  default_timeout: 120
+  resource_limits:
+    memory: "2g"
+    cpus: 2
+
+budget:
+  max_cost_per_cve: 3.0
+
+llm:
+  max_retries: 3
+  base_retry_delay: 2.0
+
+cache:
+  ttl_seconds: 604800
+
+coaching:
+  stuck_at_l0_turns: 8
+  stuck_at_l1_l2_turns: 3
+  stuck_at_l2_l3_turns: 4
+  consecutive_error_turns: 3
+  max_coaching_repeats: 3
+  grace_turns_after_l3: 3
+  grace_turns_after_l2: 5
+
+oracle:
+  critic_model: "bedrock/us.meta.llama4-maverick-17b-instruct-v1:0"
+
+resolver:
+  model: "bedrock/us.anthropic.claude-sonnet-4-6"  # Sonnet for accurate package resolution
+  max_turns: 3
+
+paths:
+  results: "data/results"
+  generated_apps: "data/generated-apps"
+  knowledge: "data/knowledge"
+  cache: "data/cache"
+  prompts: "data/prompts"

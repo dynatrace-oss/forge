@@ -1,0 +1,86 @@
+# Tuning rationale:
+#   Cost:     target ~$1/CVE, cap at $2.50 (2.5x headroom)
+#   Gen:      max_turns 8→5, max_attempts 3→2 (~$0.30)
+#   Planner:  5 turns (~$0.10)
+#   Exploit:  30→20 turns, mean=17.4 (~$0.50), budget cap handles outliers
+#   Detector: 15 turns (~$0.10)
+#   Coaching: stuck_at_l0_turns 8 (accounts for 3 recon-gated turns)
+#   Budget:   BudgetTracker shared across all agents (single source of truth)
+
+agents:
+  intel:
+    model: "github_copilot/claude-sonnet-4.5"
+    max_turns: 10
+    temperature: 0.0
+    prompt_template: "agents/intel"
+  generator:
+    model: "github_copilot/claude-sonnet-4.5"
+    max_turns: 5  # Turn 1 = write all + validate, up to 4 fix iterations
+    temperature: 0.2
+    max_tokens: 16384  # Large payloads: full project files in one tool call
+    prompt_template: "agents/generator"
+  planner:
+    model: "github_copilot/claude-sonnet-4.5"
+    max_turns: 5
+    temperature: 0.0
+    prompt_template: "agents/planner"
+  exploit:
+    model: "github_copilot/claude-sonnet-4.5"
+    max_turns: 20  # mean=17.4 turns; budget cap handles outliers
+    temperature: 0.0
+    max_tokens: 16384  # Match generator: run_exploit_script payloads can be large
+    prompt_template: "agents/exploit"
+  detector:
+    model: "github_copilot/claude-sonnet-4.5"
+    max_turns: 15  # P95=13 turns; 15 gives 15% headroom
+    temperature: 0.0
+    prompt_template: "agents/detector"
+    max_continues: 2
+    max_nudges: 1
+
+base_agent:
+  max_nudges: 2
+  max_continues: 5
+  nudge_message: "You MUST use your tools to make progress. Do not respond with text — call a tool."
+  continue_message: "Continue working on the task. Use your tools to make progress."
+  final_json_message: "Provide your final assessment as JSON with the required fields."
+
+sandbox:
+  health_check_retries: 3
+  default_timeout: 120  # seconds — podman commands and sandbox operations
+  resource_limits:
+    memory: "2g"
+    cpus: 2
+
+budget:
+  max_cost_per_cve: 2.5
+
+llm:
+  max_retries: 3          # retries on transient API errors (429, 5xx)
+  base_retry_delay: 2.0   # seconds — base for exponential backoff
+
+cache:
+  ttl_seconds: 604800     # 7 days — intel cache TTL
+
+coaching:
+  stuck_at_l0_turns: 8       # Turns stuck at L0 before coaching (was 5, raised for recon)
+  stuck_at_l1_l2_turns: 3    # Turns stuck at L1/L2 before coaching
+  stuck_at_l2_l3_turns: 4    # Turns stuck at L2/L3 before coaching
+  consecutive_error_turns: 3  # Consecutive tool errors before coaching
+  max_coaching_repeats: 3     # Max times same coaching message is repeated
+  grace_turns_after_l3: 3    # Extra turns allowed after L3 reached (then force stop)
+  grace_turns_after_l2: 5    # Extra turns allowed after L2 reached without escalation
+
+oracle:
+  critic_model: "gpt-5-mini"
+
+resolver:
+  model: "github_copilot/gpt-4o-mini"  # cheap model for package resolution (~$0.001/CVE)
+  max_turns: 2                          # 1 = direct answer, 2 = allows one web search
+
+paths:
+  results: "data/results"
+  generated_apps: "data/generated-apps"
+  knowledge: "data/knowledge"
+  cache: "data/cache"
+  prompts: "data/prompts"

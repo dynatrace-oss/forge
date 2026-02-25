@@ -1,0 +1,180 @@
+# Reusable prompt fragments for {% include %} injection.
+# Each fragment is a self-contained block that can be included in any prompt.
+# Usage: {% include "fragments/security_constraints" %}
+#
+# T1: 8 foundation fragments. T2-T3 will add more as prompts grow richer.
+
+fragments:
+  security_constraints:
+    description: Ethical and research context for all prompts
+    template: |
+      Security research constraints:
+      - All work is performed in isolated sandbox containers
+      - Exploits target only controlled test environments, never production systems
+      - Results are used exclusively for academic vulnerability assessment research
+      - Follow responsible disclosure practices
+
+  output_file_format:
+    description: The --- filename --- / --- end --- file output format
+    template: |
+      OUTPUT FORMAT — use exactly this format for each file:
+
+      --- filename ---
+      <file content>
+      --- end ---
+
+      Rules:
+      - Every file starts with --- filename --- and ends with --- end ---
+      - No markdown, no backticks, no prose between files
+      - Include ALL files needed to build and run the application
+
+  container_guidelines:
+    description: Docker container requirements for vulnerable applications
+    template: |
+      Container requirements:
+      - Dockerfile MUST use EXPOSE 8080 and bind to 0.0.0.0:8080
+      - The application must build and run inside a container
+      - For C/C++ apps: use a multi-stage Dockerfile (build stage with gcc/cmake + runtime stage)
+      - Use slim/alpine base images where possible
+      - Pin base image versions for reproducibility
+
+  endpoint_requirements:
+    description: HTTP endpoint and health check requirements
+    template: |
+      Endpoint requirements:
+      - Include a /health endpoint returning HTTP 200 with JSON {"status": "ok"}
+      - Include at least one endpoint that exposes the vulnerability
+      - For Java/Spring Boot: health_endpoint should be /actuator/health or /health
+      - For PHP without a framework: health_endpoint should be / or /index.php
+
+  dependency_rules:
+    description: Dependency management for vulnerable applications
+    template: |
+      Dependency rules:
+      - Use the specific VULNERABLE package version — do NOT use a fixed/patched version
+      - Build the REAL vulnerable library — do NOT write simulated/mock vulnerability code
+      - Pin all dependency versions explicitly
+      - Include all transitive dependencies required for the vulnerability
+
+  forge_meta_format:
+    description: FORGE-META block format for build output
+    template: |
+      Start your output with this metadata block:
+
+      --- FORGE-META ---
+      health_endpoint: /health
+      port: 8080
+      --- end ---
+
+      The FORGE-META block MUST be the first block, followed by the Dockerfile.
+
+  error_handling:
+    description: Error recovery guidance for build and exploit phases
+    template: |
+      Error handling:
+      - If a build fails, analyze the error output carefully before retrying
+      - Common issues: missing dependencies, wrong port binding, missing config files
+      - For database-dependent apps: use an embedded/in-memory DB (H2 for Java, SQLite for Python/PHP)
+      - For security library configs: include all required config files (e.g., ESAPI)
+      - Ensure all shared libraries are installed in the runtime image
+
+  cwe_guidance:
+    description: >
+      Placeholder for CWE-specific exploit guidance. Will be enriched in T5
+      with ExploitStrategy, FailureMode, and escalation_paths from CWE modules.
+    template: |
+      {% if cwe_ids is defined and cwe_ids %}
+      Target vulnerability class: {{ cwe_ids }}
+      {% endif %}
+      {% if cwe_strategies is defined and cwe_strategies %}
+      {{ cwe_strategies }}
+      {% endif %}
+
+  exploit_output_format:
+    description: Output format for exploit scripts
+    template: |
+      Return the exploit as:
+      --- exploit.py ---
+      <script>
+      --- end ---
+
+  language_idioms:
+    description: >
+      Placeholder for language-specific packaging and framework guidance.
+      T2 will add per-language fragment files (lang_python.yaml, etc.).
+    template: |
+      {% if language is defined and language %}
+      Target language: {{ language }}
+      {% endif %}
+
+  osv_context:
+    description: >
+      Advisory context from OSV/GHSA enrichment (R1). Injected into build
+      and exploit system prompts when the task has been enriched.
+    template: |
+      {% if osv_enriched is defined and osv_enriched %}
+      ## Advisory Intelligence (OSV/GHSA)
+
+      This vulnerability has structured advisory data from the OSV database.
+      Use this information to select the correct vulnerable package version
+      and understand the exact scope of the vulnerability.
+
+      {% if advisory_summary is defined and advisory_summary %}
+      **Advisory summary**: {{ advisory_summary }}
+      {% endif %}
+      {% if affected_versions is defined and affected_versions %}
+      **Affected version ranges**: {{ affected_versions | join(", ") }}
+      {% endif %}
+      {% if fix_versions is defined and fix_versions %}
+      **Fixed in versions**: {{ fix_versions | join(", ") }}
+      — Use a version BEFORE these fixes. Do NOT use a fixed version.
+      {% endif %}
+      {% if fix_commit_url is defined and fix_commit_url %}
+      **Fix commit**: {{ fix_commit_url }}
+      — Study this commit to understand the exact vulnerable code path.
+      {% endif %}
+      {% if advisory_urls is defined and advisory_urls %}
+      **Advisory references**:
+      {% for url in advisory_urls %}
+      - {{ url }}
+      {% endfor %}
+      {% endif %}
+      {% endif %}
+
+  build_intelligence:
+    description: >
+      Structured build-phase knowledge (R2). Injected into exploit system
+      prompts to prevent knowledge evaporation (F1). The exploit LLM
+      receives precise information about vulnerable files, endpoints,
+      and application structure — no need to rediscover from raw source.
+    template: |
+      {% if has_build_intel is defined and has_build_intel %}
+      ## Build Intelligence
+
+      The application was built and deployed successfully. Use this
+      structured context to target your exploit precisely — do NOT
+      guess endpoints or ports when the information is provided here.
+
+      {% if vulnerable_file_paths is defined and vulnerable_file_paths %}
+      **Vulnerable files**: {{ vulnerable_file_paths | join(", ") }}
+      {% endif %}
+      {% if endpoint_urls is defined and endpoint_urls %}
+      **Discovered endpoints**: {{ endpoint_urls | join(", ") }}
+      — Target these EXACT paths. Do not guess or fabricate endpoints.
+      {% endif %}
+      {% if dependency_versions is defined and dependency_versions %}
+      **Dependencies**: {% for pkg, ver in dependency_versions.items() %}{{ pkg }}=={{ ver }}{% if not loop.last %}, {% endif %}{% endfor %}
+      {% endif %}
+      **Application port**: {{ app_port }}
+      **Health endpoint**: {{ health_endpoint }}
+      {% if injection_point_description is defined and injection_point_description %}
+      **Injection point**: {{ injection_point_description }}
+      {% endif %}
+      {% if source_structure is defined and source_structure %}
+
+      ### Source Structure
+      {% for path, desc in source_structure.items() %}
+      - `{{ path }}`: {{ desc }}
+      {% endfor %}
+      {% endif %}
+      {% endif %}

@@ -1,0 +1,47 @@
+# Package registry endpoints for validating that resolved packages exist.
+# Used by the LLM resolver to verify package names before passing them
+# to the generator agent.
+#
+# Placeholders:
+#   {package}  — full package name (e.g., "express", "lunary")
+#   {group}    — Maven groupId (e.g., "org.springframework")
+#   {artifact} — Maven artifactId (e.g., "spring-web")
+#   {package_lower} — package name lowercased (for case-insensitive registries)
+#
+# Timeout applies to each validation HTTP request (seconds).
+
+timeout: 5.0
+
+registries:
+  npm:
+    url: "https://registry.npmjs.org/{package}"
+    method: HEAD
+
+  pypi:
+    url: "https://pypi.org/pypi/{package}/json"
+    method: HEAD
+
+  maven:
+    # Maven uses groupId:artifactId format; group dots become slashes
+    url: "https://repo1.maven.org/maven2/{group_path}/{artifact}/maven-metadata.xml"
+    method: HEAD
+
+  go:
+    url: "https://proxy.golang.org/{package}/@latest"
+    method: GET
+
+  packagist:
+    url: "https://repo.packagist.org/p2/{package}.json"
+    method: GET
+
+  rubygems:
+    url: "https://rubygems.org/api/v1/gems/{package}.json"
+    method: HEAD
+
+  crates.io:
+    url: "https://crates.io/api/v1/crates/{package}"
+    method: GET
+
+  nuget:
+    url: "https://api.nuget.org/v3-flatcontainer/{package_lower}/index.json"
+    method: HEAD

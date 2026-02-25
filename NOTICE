@@ -1,0 +1,47 @@
+FORGE
+Copyright (c) 2025 Dynatrace LLC. All rights reserved.
+
+This product is licensed under a proprietary license. See LICENSE for details.
+
+This product includes software developed by third parties under the following licenses:
+
+------------------------------------------------------------------------------
+Apache License 2.0
+------------------------------------------------------------------------------
+
+  litellm (https://github.com/BerriAI/litellm)
+  opentelemetry-api (https://github.com/open-telemetry/opentelemetry-python)
+  opentelemetry-sdk (https://github.com/open-telemetry/opentelemetry-python)
+  opentelemetry-exporter-otlp (https://github.com/open-telemetry/opentelemetry-python)
+  boto3 (https://github.com/boto/boto3)
+  pydantic (https://github.com/pydantic/pydantic)
+  httpx (https://github.com/encode/httpx)
+  click (https://github.com/pallets/click)
+  scikit-learn (https://github.com/scikit-learn/scikit-learn)
+
+------------------------------------------------------------------------------
+MIT License
+------------------------------------------------------------------------------
+
+  rich (https://github.com/Textualize/rich)
+  python-dotenv (https://github.com/theskumar/python-dotenv)
+  pandas (https://github.com/pandas-dev/pandas)
+  matplotlib (https://github.com/matplotlib/matplotlib)
+  jinja2 (https://github.com/pallets/jinja)
+  pyyaml (https://github.com/yaml/pyyaml)
+  statsmodels (https://github.com/statsmodels/statsmodels)
+  idstools (https://github.com/jasonish/py-idstools)
+
+------------------------------------------------------------------------------
+BSD 3-Clause License
+------------------------------------------------------------------------------
+
+  scipy (https://github.com/scipy/scipy)
+  podman (https://github.com/containers/podman-py)
+  kubernetes (https://github.com/kubernetes-client/python)
+
+------------------------------------------------------------------------------
+LGPL-2.1 License
+------------------------------------------------------------------------------
+
+  pySigma (https://github.com/SigmaHQ/pySigma)
