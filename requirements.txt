@@ -17,7 +17,7 @@ cffi==1.17.1
 charset-normalizer==3.4.1
 click==8.1.8
 colorama==0.4.6
-cryptography==44.0.2
+cryptography==46.0.5
 dataclasses-json==0.6.7
 Deprecated==1.2.18
 dirtyjson==1.0.8
