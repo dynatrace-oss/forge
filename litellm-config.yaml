@@ -1,0 +1,63 @@
+# FORGE — LiteLLM Configuration
+# All LLM calls route through GitHub Copilot subscription via LiteLLM.
+# Sends telemetry via OTEL for token measurement (RQ1, D9/D18).
+#
+# === DIRECT SDK USAGE (recommended for walking skeleton) ===
+#
+# No proxy needed. FORGE calls litellm.acompletion() directly with the
+# `github_copilot/` provider prefix. On first use, LiteLLM triggers
+# OAuth device flow — a browser window opens for GitHub authentication.
+# Credentials are cached at ~/.config/litellm/github_copilot/.
+#
+# Model names used in code:
+#   github_copilot/claude-sonnet-4.5   (D3: primary)
+#   github_copilot/gpt-4.1            (D4: secondary / cross-model)
+#   github_copilot/gpt-5-mini         (D5: reasoning)
+#
+# Example:
+#   import litellm
+#   response = await litellm.acompletion(
+#       model="github_copilot/claude-sonnet-4.5",
+#       messages=[{"role": "user", "content": "hello"}],
+#   )
+#
+# === PROXY MODE (optional, for multi-user or gateway setups) ===
+#
+# Start the proxy:
+#   litellm --config litellm-config.yaml --port 4000
+#
+# Then point FORGE at the proxy:
+#   export LITELLM_PROXY_URL=http://localhost:4000
+#   export LITELLM_PROXY_KEY=sk-forge2-local
+
+model_list:
+  # D3: Primary LLM — Claude Sonnet 4.5 (via GitHub Copilot)
+  - model_name: claude-sonnet-4.5
+    litellm_params:
+      model: github_copilot/claude-sonnet-4.5
+      # No api_key needed — OAuth device flow handles auth
+
+  # D4: Secondary LLM — GPT-4.1 (via GitHub Copilot)
+  - model_name: gpt-4.1
+    litellm_params:
+      model: github_copilot/gpt-4.1
+
+  # D5: Reasoning LLM — GPT-5 mini (via GitHub Copilot)
+  - model_name: gpt-5-mini
+    litellm_params:
+      model: github_copilot/gpt-5-mini
+
+litellm_settings:
+  # Drop unsupported params silently (prevents errors with provider-specific params)
+  drop_params: true
+
+  # OTEL callbacks for token measurement (D9/D18)
+  success_callback: ["otel"]
+  failure_callback: ["otel"]
+
+  # Token counting
+  enable_token_counting: true
+
+general_settings:
+  # Local master key — NOT sent to GitHub. Used by clients to auth against proxy.
+  master_key: os.environ/LITELLM_MASTER_KEY

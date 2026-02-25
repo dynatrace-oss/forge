@@ -1,0 +1,160 @@
+# Model pricing and context window configuration.
+# Used by LLMClient for cost estimation and context truncation.
+# Update this file when adding new models or when pricing changes.
+
+defaults:
+  cost_per_1m_input: 3.0
+  cost_per_1m_output: 15.0
+  context_window: 200000
+
+models:
+  # --- Anthropic ---
+
+  claude-opus-4.7:
+    cost_per_1m_input: 5.0
+    cost_per_1m_output: 25.0
+    context_window: 200000
+
+  claude-opus-4.6:
+    cost_per_1m_input: 5.0
+    cost_per_1m_output: 25.0
+    context_window: 200000
+
+  claude-opus-4.5:
+    cost_per_1m_input: 5.0
+    cost_per_1m_output: 25.0
+    context_window: 200000
+
+  claude-opus-4.1:
+    cost_per_1m_input: 15.0
+    cost_per_1m_output: 75.0
+    context_window: 200000
+
+  claude-sonnet-4.6:
+    cost_per_1m_input: 3.0
+    cost_per_1m_output: 15.0
+    context_window: 1000000
+
+  claude-sonnet-4.5:
+    cost_per_1m_input: 3.0
+    cost_per_1m_output: 15.0
+    context_window: 200000
+
+  claude-sonnet-4:
+    cost_per_1m_input: 3.0
+    cost_per_1m_output: 15.0
+    context_window: 200000
+
+  claude-haiku-4.5:
+    cost_per_1m_input: 1.0
+    cost_per_1m_output: 5.0
+    context_window: 200000
+
+  # --- OpenAI ---
+
+  gpt-5:
+    cost_per_1m_input: 1.25
+    cost_per_1m_output: 10.0
+    context_window: 400000
+
+  gpt-5-mini:
+    cost_per_1m_input: 0.25
+    cost_per_1m_output: 2.0
+    context_window: 400000
+
+  gpt-4.1:
+    cost_per_1m_input: 2.0
+    cost_per_1m_output: 8.0
+    context_window: 1000000
+
+  gpt-4.1-mini:
+    cost_per_1m_input: 0.40
+    cost_per_1m_output: 1.60
+    context_window: 1000000
+
+  gpt-4.1-nano:
+    cost_per_1m_input: 0.10
+    cost_per_1m_output: 0.40
+    context_window: 1000000
+
+  gpt-4o:
+    cost_per_1m_input: 2.50
+    cost_per_1m_output: 10.0
+    context_window: 128000
+
+  gpt-4o-mini:
+    cost_per_1m_input: 0.15
+    cost_per_1m_output: 0.60
+    context_window: 128000
+
+  o3:
+    cost_per_1m_input: 2.0
+    cost_per_1m_output: 8.0
+    context_window: 200000
+
+  o4-mini:
+    cost_per_1m_input: 1.10
+    cost_per_1m_output: 4.40
+    context_window: 200000
+
+  # --- Google ---
+
+  gemini-2.5-pro:
+    cost_per_1m_input: 1.25
+    cost_per_1m_output: 10.0
+    context_window: 1000000
+
+  gemini-2.5-flash:
+    cost_per_1m_input: 0.30
+    cost_per_1m_output: 2.50
+    context_window: 1000000
+
+  gemini-2.5-flash-lite:
+    cost_per_1m_input: 0.10
+    cost_per_1m_output: 0.40
+    context_window: 1000000
+
+  gemini-2.0-flash:
+    cost_per_1m_input: 0.10
+    cost_per_1m_output: 0.40
+    context_window: 1000000
+
+  # --- AWS Bedrock ---
+  # Keys must match the part after the last "/" in the litellm model string.
+  # Bedrock inference profiles use "us." prefix: "bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+  # The cost lookup uses model.split("/")[-1], so keys include the "us." prefix.
+
+  us.anthropic.claude-sonnet-4-5-20250929-v1:0:
+    cost_per_1m_input: 3.0
+    cost_per_1m_output: 15.0
+    context_window: 200000
+
+  us.anthropic.claude-haiku-4-5-20251001-v1:0:
+    cost_per_1m_input: 1.0
+    cost_per_1m_output: 5.0
+    context_window: 200000
+
+  us.anthropic.claude-opus-4-6-v1:
+    cost_per_1m_input: 5.0
+    cost_per_1m_output: 25.0
+    context_window: 200000
+
+  us.anthropic.claude-sonnet-4-6:
+    cost_per_1m_input: 3.0
+    cost_per_1m_output: 15.0
+    context_window: 1000000
+
+  us.meta.llama4-scout-17b-instruct-v1:0:
+    cost_per_1m_input: 0.27
+    cost_per_1m_output: 0.36
+    context_window: 10000000
+
+  us.meta.llama4-maverick-17b-instruct-v1:0:
+    cost_per_1m_input: 0.50
+    cost_per_1m_output: 0.77
+    context_window: 1000000
+
+  mistral.mistral-large-2402-v1:0:
+    cost_per_1m_input: 2.0
+    cost_per_1m_output: 6.0
+    context_window: 128000
