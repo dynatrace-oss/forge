@@ -1,0 +1,8 @@
+# FORGE Dashboard Theme — Dynatrace-inspired dark palette
+# Reference: https://developer.dynatrace.com/design/design-tokens/Colors/
+
+[theme]
+primaryColor = "#474fcf"              # Dynatrace Primary accent
+backgroundColor = "#19192c"           # Dynatrace dark base background
+secondaryBackgroundColor = "#212135"  # Dynatrace neutral container
+textColor = "#f0f0f5"                 # Dynatrace foreground

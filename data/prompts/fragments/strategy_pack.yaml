@@ -1,0 +1,59 @@
+id: strategy_pack_guidance
+phase: exploit
+role: context
+
+template: |
+  {% if strategy_pack is defined and strategy_pack %}
+  ## CWE-Conditioned Strategy Pack ({{ strategy_pack.cwe_id }} / {{ strategy_pack.language }})
+
+  You have structured exploitation guidance for this vulnerability class.
+  Use the strategies below in priority order. Each includes concrete payloads
+  and expected server responses so you can confirm progress.
+
+  {% for strategy in strategy_pack.strategies | sort(attribute='priority') %}
+  ### Strategy {{ strategy.priority }}: {{ strategy.name }}
+  {{ strategy.description }}
+  {% if strategy.preconditions %}
+  **Preconditions**: {{ strategy.preconditions | join(', ') }}
+  {% endif %}
+  **Expected response**: {{ strategy.expected_response }}
+  **Payload patterns**:
+  {% for p in strategy.payload_patterns %}
+  ```
+  {{ p }}
+  ```
+  {% endfor %}
+
+  {% endfor %}
+  {% if strategy_pack.oracle_criteria %}
+  ### Exploitation Level Criteria
+
+  These indicators tell you what exploitation level you have achieved:
+
+  {% for level, indicators in strategy_pack.oracle_criteria | dictsort %}
+  **Level {{ level }}**: {{ indicators | join(' | ') }}
+  {% endfor %}
+  {% endif %}
+
+  {% if strategy_pack.escalation_paths %}
+  ### Escalation Paths
+
+  After achieving a base level, escalate deeper:
+
+  {% for esc in strategy_pack.escalation_paths %}
+  - **L{{ esc.from_level }} → L{{ esc.to_level }}**: {{ esc.technique }}
+    Confirm via: {{ esc.indicators | join(', ') }}
+  {% endfor %}
+  {% endif %}
+
+  {% if strategy_pack.failure_modes %}
+  ### Known Failure Modes
+
+  If your exploit is not working, check these patterns:
+
+  {% for fm in strategy_pack.failure_modes %}
+  - **{{ fm.pattern }}**: {{ fm.diagnosis }}{% if fm.bypass %}
+    *Bypass*: {{ fm.bypass }}{% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endif %}

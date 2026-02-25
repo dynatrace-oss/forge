@@ -1,0 +1,315 @@
+# Oracle Pattern Configuration
+#
+# This file provides CWE alias mappings and natural-language evidence
+# descriptions that the LLM oracle uses to evaluate exploitation evidence.
+# All regex patterns have been replaced by natural-language context that
+# the LLM oracle interprets directly.
+
+# Map child/variant CWEs to the parent whose caps/descriptions they share.
+aliases:
+  CWE-77: CWE-78    # Command Injection → OS Command Injection
+  CWE-80: CWE-79    # Basic XSS → Cross-Site Scripting
+  CWE-29: CWE-22    # Path Traversal variant → Path Traversal
+  CWE-36: CWE-22    # Absolute Path Traversal → Path Traversal
+  CWE-863: CWE-862  # Incorrect Authorization → Missing Authorization
+  CWE-285: CWE-862  # Improper Authorization → Missing Authorization
+  CWE-639: CWE-862  # IDOR → Missing Authorization
+  CWE-770: CWE-400  # Resource Limits → Resource Consumption
+  CWE-74: CWE-94    # Injection (parent) → Code Injection
+  CWE-116: CWE-79   # Improper Output Encoding → XSS
+
+# CWE-specific evidence descriptions for the LLM oracle prompt.
+# Each entry describes what exploitation looks like at each relevant level,
+# giving the LLM concrete indicators to look for.
+cwe_evidence:
+  CWE-89:  # SQL Injection
+    name: SQL Injection
+    max_level: 3
+    indicators:
+      L1: >
+        SQL error messages in response (syntax error, unexpected token),
+        database-specific error strings (e.g. "near syntax", "unterminated
+        string"), HTTP 500 from a query with SQL metacharacters.
+      L2: >
+        Query returns data not normally accessible — user records, password
+        hashes, schema information (information_schema, sqlite_master, pg_catalog).
+        UNION SELECT returning extra columns. Blind SQLi confirmed via
+        boolean/time-based differential responses.
+      L3: >
+        Full data dump — multiple rows of user data with credentials.
+        Database records returned as JSON arrays. Writing to filesystem
+        via INTO OUTFILE or similar. Stacked queries executing commands.
+
+  CWE-78:  # OS Command Injection
+    name: OS Command Injection
+    max_level: 3
+    indicators:
+      L1: >
+        Command injection metacharacters (;, |, &&, backticks, $()) in the
+        request and the response shows abnormal behavior — error from shell,
+        unexpected output, or delayed response suggesting command execution.
+      L2: >
+        Command output visible in response — system info (uname output,
+        hostname, Linux kernel version), directory listings (/home, /var, /etc),
+        environment variable values.
+      L3: >
+        Full command execution confirmed — id command output (uid=NNN(user) gid=NNN),
+        /etc/passwd content (root:x:0:0:), file read/write on the target server,
+        reverse shell established. Marker files created in /tmp.
+
+  CWE-22:  # Path Traversal
+    name: Path Traversal
+    max_level: 2  # CAPPED — file read is L2, not L3
+    indicators:
+      L1: >
+        Path traversal sequences (../, %2e%2e%2f) in the request and the
+        response differs from normal — different error, partial file content,
+        or directory listing instead of expected resource.
+      L2: >
+        Sensitive file content read — /etc/passwd, private keys (BEGIN PRIVATE KEY),
+        application config files with secrets (DB_PASSWORD, SECRET_KEY, DATABASE_URL),
+        source code of other application files.
+
+  CWE-79:  # Cross-Site Scripting
+    name: Cross-Site Scripting
+    max_level: 2  # CAPPED — XSS is client-side, max L2
+    indicators:
+      L1: >
+        XSS payload present in request (<script>, javascript:, event handlers
+        like onerror=) and the response reflects the payload without proper
+        encoding, or shows an error specific to script content.
+      L2: >
+        XSS payload fully reflected or stored in the HTML response — <script>
+        tags with alert(), event handler attributes (onerror=alert), DOM
+        manipulation payloads. The payload appears in the response body
+        exactly as injected, unescaped.
+
+  CWE-502:  # Deserialization
+    name: Insecure Deserialization
+    max_level: 3
+    indicators:
+      L1: >
+        Deserialization-specific errors — UnpicklingError, ClassNotFoundException,
+        DeserializationError, yaml.scanner.ScannerError. Server processes the
+        serialized payload but fails during deserialization.
+      L2: >
+        Deserialization side-effects observed — DNS callback from gadget chain,
+        HTTP request to attacker-controlled URL, information disclosure from
+        object properties accessed during deserialization.
+      L3: >
+        Code execution via deserialization — marker files created (/tmp/pwned,
+        /tmp/rce), command output from __reduce__ or gadget chain, reverse
+        shell via deserialization payload.
+
+  CWE-918:  # SSRF
+    name: Server-Side Request Forgery
+    max_level: 3
+    indicators:
+      L1: >
+        SSRF attempt with internal URLs (127.0.0.1, localhost, internal IPs)
+        and the response shows different behavior than for external URLs —
+        different error message, timing difference, or partial content.
+      L2: >
+        Internal service content accessed — file content via file:// protocol,
+        internal service responses (JSON from internal APIs, database connection
+        info), cloud metadata (though not available in Podman sandbox).
+      L3: >
+        SSRF to internal services achieving code execution — Redis SLAVE OF
+        or CONFIG SET, internal admin panels accessed with write capability,
+        chained SSRF to RCE via internal services.
+
+  CWE-611:  # XXE
+    name: XML External Entity Injection
+    max_level: 3
+    indicators:
+      L1: >
+        XXE payload (<!ENTITY, SYSTEM) in request and server processes the
+        XML — different error than for non-XML input, or partial entity
+        expansion visible.
+      L2: >
+        File content read via XXE — /etc/passwd, config files, application
+        source code. Or SSRF via XXE to internal services.
+      L3: >
+        XXE to code execution — writing files via XXE, or chaining XXE
+        with SSRF to achieve command execution on internal services.
+
+  CWE-434:  # Unrestricted File Upload
+    name: Unrestricted File Upload
+    max_level: 3
+    indicators:
+      L1: >
+        File upload with executable extension (.php, .jsp, .py, .sh) accepted
+        by the server — upload confirmation message, file accessible at
+        expected URL, or different response than for blocked extensions.
+      L2: >
+        Uploaded file accessible and partially executing — PHP info page,
+        script output visible, file content served with executable content type.
+      L3: >
+        Uploaded webshell executing commands — id command output, file system
+        access, system commands executed through the uploaded file. Output like
+        uid=0(root) from the uploaded script endpoint.
+
+  CWE-200:  # Information Exposure
+    name: Information Exposure
+    max_level: 2
+    indicators:
+      L1: >
+        Debug endpoints accessible (/debug, /actuator, /phpinfo, /__debug__,
+        /server-status), verbose error messages with stack traces, technology
+        version strings disclosed.
+      L2: >
+        Sensitive data exposed — private keys (BEGIN PRIVATE KEY), API keys,
+        JWT tokens, database credentials, connection strings with passwords,
+        internal IP addresses, cloud credentials (AWS access keys starting
+        with AKIA).
+
+  CWE-94:  # Code Injection
+    name: Code Injection
+    max_level: 3
+    indicators:
+      L1: >
+        Code injection payload (eval, exec, __import__, require, template
+        expressions like {{ }}) in request and server shows abnormal behavior —
+        different error, unexpected output, or processing delay.
+      L2: >
+        Code execution side-effects — information disclosure from injected
+        code, file reads via injected expressions, environment variable leaks.
+      L3: >
+        Full code execution — OS command output (id, whoami, uname), file
+        system writes (marker files in /tmp), reverse shell via injected code.
+
+  CWE-400:  # Resource Consumption (DoS)
+    name: Resource Consumption / Denial of Service
+    max_level: 2  # DoS proves availability impact, not confidentiality/integrity
+    indicators:
+      L1: >
+        Resource consumption payload sent (large input, exponential regex,
+        infinite loop trigger) and server response time increases significantly,
+        or server returns timeout/resource exhaustion errors.
+      L2: >
+        Service denial confirmed — server becomes unresponsive (timeout on
+        subsequent requests), OOM crash (out of memory), connection reset
+        by peer after resource exhaustion, process crash visible in logs.
+
+  CWE-1333:  # ReDoS
+    name: Regular Expression Denial of Service
+    max_level: 2
+    indicators:
+      L1: >
+        ReDoS payload sent (evil regex input with exponential backtracking)
+        and response time is noticeably longer than for normal input.
+      L2: >
+        Service denial confirmed — request times out, server stops responding
+        to other requests, visible CPU spike or OOM in server logs.
+
+  CWE-287:  # Authentication Bypass
+    name: Authentication Bypass
+    max_level: 3
+    indicators:
+      L1: >
+        Authentication bypass attempt (admin credentials, manipulated tokens,
+        missing auth headers) and the server responds differently than for
+        anonymous requests — partial content, different error code.
+      L2: >
+        Authenticated actions performed without valid credentials — accessing
+        protected resources, viewing other users' data, performing admin actions.
+      L3: >
+        Full admin/root access achieved — creating users, modifying system
+        config, accessing all data, privilege escalation to admin role.
+
+  CWE-862:  # Missing Authorization (IDOR)
+    name: Missing Authorization / IDOR
+    max_level: 3
+    indicators:
+      L1: >
+        IDOR attempt (changing user_id, account_id, order_id parameters)
+        and server returns data without authorization check — no 403, data
+        for the manipulated ID returned.
+      L2: >
+        Accessing other users' data — viewing profiles, orders, messages
+        that belong to different user IDs. Horizontal privilege escalation.
+      L3: >
+        Vertical privilege escalation — accessing admin endpoints, modifying
+        other users' data, performing destructive operations on resources
+        owned by other users.
+
+  CWE-601:  # Open Redirect
+    name: Open Redirect
+    max_level: 2  # CAPPED — redirect is L2 max
+    indicators:
+      L1: >
+        Redirect parameter (redirect_url, return_to, next, goto) set to
+        external URL and server includes the URL in response headers or body.
+      L2: >
+        Server responds with Location header pointing to the attacker-controlled
+        URL, or renders a page that redirects to the external URL.
+
+  CWE-352:  # CSRF
+    name: Cross-Site Request Forgery
+    max_level: 2
+    indicators:
+      L1: >
+        State-changing request (POST/PUT/DELETE) accepted without CSRF token,
+        or the token validation can be bypassed (empty token, token from
+        different session).
+      L2: >
+        State change confirmed without CSRF protection — user data modified,
+        settings changed, or actions performed via cross-origin request.
+
+  CWE-284:  # Improper Access Control
+    name: Improper Access Control
+    max_level: 3
+    indicators:
+      L1: >
+        Access control bypass attempt (manipulated headers like X-Forwarded-For,
+        X-Original-URL, admin credentials) and server responds differently.
+      L2: >
+        Protected resources accessed — admin panel visible, restricted API
+        endpoints responding with data, privilege escalation indicators.
+      L3: >
+        Full administrative access — system configuration changes, user
+        management operations, complete data access.
+
+  CWE-20:  # Improper Input Validation
+    name: Improper Input Validation
+    max_level: 3
+    indicators:
+      L1: >
+        Malformed input (null bytes, special characters, type confusion with
+        __proto__, NaN, Infinity) accepted by the server without proper
+        validation — different behavior than for expected input.
+      L2: >
+        Validation bypass leads to data access or state change — accessing
+        resources via path manipulation, type confusion leading to auth bypass.
+      L3: >
+        Validation bypass chains to code execution — prototype pollution
+        leading to RCE, type confusion enabling command injection.
+
+  CWE-532:  # Sensitive Info in Log
+    name: Insertion of Sensitive Information into Log
+    max_level: 2
+    indicators:
+      L1: >
+        Log endpoints or files accessible (/logs/, /var/log/), or application
+        logging sensitive data visible in response (passwords, tokens, API keys
+        appearing in log output or error messages).
+      L2: >
+        Credentials or secrets extracted from logs — passwords, API keys,
+        session tokens, database credentials found in log files or log API
+        responses.
+
+  CWE-345:  # Insufficient Verification of Data Authenticity
+    name: Insufficient Verification of Data Authenticity
+    max_level: 3
+    indicators:
+      L1: >
+        Signature/HMAC/JWT verification bypass attempt and server accepts the
+        modified data — no signature validation error, or the validation can
+        be skipped (alg:none attack on JWT).
+      L2: >
+        Forged data accepted — modified JWT with elevated privileges accepted,
+        unsigned requests processed as authenticated, HMAC bypass allowing
+        data tampering.
+      L3: >
+        Full authentication bypass via signature forgery — admin access via
+        forged JWT, complete trust chain compromise.

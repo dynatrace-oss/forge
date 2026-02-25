@@ -1,0 +1,72 @@
+id: sigma_user
+phase: detection
+role: user
+
+template: |
+  Generate a Sigma detection rule for the following exploitation attempt.
+
+  ## Vulnerability
+  - CVE: {{ cve_id }}
+  - CWE: {{ cwe_id }}
+  - Exploitation Level: {{ exploitation_level }}/3
+  - Confidence Tier: {{ confidence_tier }}
+
+  ## HTTP Exchanges Observed
+  {% if http_exchanges %}
+  {% for ex in http_exchanges %}
+  - {{ ex.method }} {{ ex.url }} → HTTP {{ ex.status_code }}
+  {%- if ex.request_body %}
+    Body: {{ ex.request_body[:200] }}
+  {%- endif %}
+  {% endfor %}
+  {% else %}
+  No HTTP exchanges captured.
+  {% endif %}
+
+  ## Exploit Payloads
+  {% if payloads %}
+  {% for payload in payloads %}
+  ```
+  {{ payload[:500] }}
+  ```
+  {% endfor %}
+  {% else %}
+  No payload files available.
+  {% endif %}
+
+  ## File Artifacts
+  {% if file_artifacts %}
+  {% for f in file_artifacts %}
+  - [{{ f.action }}] {{ f.path }}
+  {% endfor %}
+  {% else %}
+  No file artifacts observed.
+  {% endif %}
+
+  ## Log Patterns
+  {% if log_patterns %}
+  {% for p in log_patterns %}
+  - {{ p }}
+  {% endfor %}
+  {% else %}
+  No distinctive log patterns.
+  {% endif %}
+
+  ## Crash Signals
+  {% if crash_signals %}
+  {% for s in crash_signals %}
+  - {{ s }}
+  {% endfor %}
+  {% else %}
+  No crash signals detected.
+  {% endif %}
+
+  {% if detection_indicators %}
+  ## Strategy Pack Detection Indicators
+  {% for ind in detection_indicators %}
+  - [L{{ ind.level }}] {{ ind.indicator_type }}: {{ ind.pattern }} — {{ ind.description }}
+  {% endfor %}
+  {% endif %}
+
+  Generate a Sigma rule that detects this exploitation attempt pattern.
+  Set the rule level to {{ confidence_tier }}.
