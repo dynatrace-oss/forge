@@ -1,0 +1,10 @@
+<repository>
+    <id>xwiki-releases</id>
+    <url>https://nexus.xwiki.org/nexus/content/groups/public</url>
+    <releases>
+        <enabled>true</enabled>
+    </releases>
+    <snapshots>
+        <enabled>false</enabled>
+    </snapshots>
+</repository>

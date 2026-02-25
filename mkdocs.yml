@@ -1,0 +1,14 @@
+site_name: FORGE
+site_description: FORGE is an AI-assisted framework for automated vulnerability research, designed to support the entire lifecycle of vulnerability analysis from generating vulnerable applications to verifying exploits.
+repo_url: https://bitbucket.lab.dynatrace.org/projects/CASP/repos/gyros/browse
+docs_dir: docs
+nav:
+  - index.md
+  - blueprint_technical_doc.md
+  - dependency_management_guide.md
+  - framework_support_guide.md
+  - llm_enhancement_guide.md
+  - reliability_features_guide.md
+  - template_guide.md
+plugins:
+  - techdocs-core

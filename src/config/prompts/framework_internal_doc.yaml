@@ -1,0 +1,219 @@
+metadata:
+  name: framework_internal_doc
+  version: 2.0.0
+  description: Generate documentation for framework-internal vulnerabilities
+  category: vulnerability
+  author: FORGE Framework
+  last_updated: '2025-11-03'
+  extends: base_vulnerability_code_generation
+  tags:
+  - vulnerability
+  - framework-internal
+  - documentation
+
+placeholders:
+  required:
+  - available_libraries
+  - cve_id
+  - description
+  - github_context
+  - package_name
+  - package_version
+  - references
+  - summary
+  - version_guidance
+  - vulnerability_type
+  optional:
+  - cwe_ids
+  - cwe_descriptions
+  - dependencies_section
+  - dependency_context
+  - framework_context
+  - similar_examples
+
+template: |
+  {% extends 'base_vulnerability_code_generation.yaml' %}
+
+  {% block github_usage_instructions %}
+  {% include 'github_usage_framework_internal' %}
+  {% endblock %}
+
+  {% block task_specific_instructions %}
+  ## LIMITATION IDENTIFIED:
+
+  This CVE is a **FRAMEWORK-INTERNAL** vulnerability that exists in framework code (interceptors, filters, parameter resolvers, middleware), not in user application code.
+
+  **User application code CANNOT directly demonstrate this vulnerability** because:
+  1. The bug is in framework internals that execute during request processing
+  2. The vulnerability manifests before/during framework processing, not in user code
+  3. User code executes after the vulnerable framework code has already run
+
+  ## TASK:
+
+  Create TWO artifacts:
+
+  ### 1. Minimal Trigger Application
+
+  Generate a minimal application that:
+  - Uses the vulnerable **{{ package_name }} version {{ package_version }}**
+  - Creates endpoints that TRIGGER the framework's internal processing
+  - Includes extensive comments explaining that the vulnerability is IN THE FRAMEWORK
+  - Demonstrates that the application uses the vulnerable framework version
+
+  The application should be as simple as possible while exercising the vulnerable framework component.
+
+  ### 2. Comprehensive README Documentation
+
+  Create a detailed README.md that explains:
+  - Why this is classified as FRAMEWORK_INTERNAL
+  - Which framework component contains the vulnerability
+  - How the framework processes requests internally
+  - What evidence would indicate the vulnerability
+  - Educational value and limitations of this demonstration
+
+  ## Minimal Application Structure:
+
+  Create a SIMPLE application that exercises the framework. Example:
+
+  ```java
+  package com.vuln;
+
+  import org.springframework.boot.SpringApplication;
+  import org.springframework.boot.autoconfigure.SpringBootApplication;
+  import org.springframework.web.bind.annotation.*;
+
+  /**
+   * CVE-{{ cve_id }}: {{ summary }}
+   *
+   * EDUCATIONAL PURPOSE - FRAMEWORK-INTERNAL VULNERABILITY LIMITATION
+   *
+   * This application uses {{ package_name }} version {{ package_version }}, which
+   * contains a vulnerability in its internal {{ vulnerability_type }} processing.
+   *
+   * IMPORTANT: The vulnerability is IN THE FRAMEWORK CODE, not in this
+   * user application code. This application simply triggers the framework's
+   * internal processing by creating endpoints that use parameter binding,
+   * request processing, or other framework features.
+   *
+   * The vulnerable code path is in framework internal classes like:
+   * - org.springframework.web.method.annotation.RequestParamMethodArgumentResolver
+   * - org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod
+   * - [Other framework-internal classes from GitHub fix commits]
+   *
+   * When a request is made to these endpoints, the framework's internal
+   * components process it BEFORE this user code executes. The vulnerability
+   * occurs during that internal framework processing.
+   */
+  @SpringBootApplication
+  public class FrameworkInternalTrigger {
+
+      public static void main(String[] args) {
+          System.out.println("Starting application with {{ package_name }} {{ package_version }}");
+          System.out.println("FRAMEWORK-INTERNAL vulnerability: The bug is in framework code");
+          SpringApplication.run(FrameworkInternalTrigger.class, args);
+      }
+
+      @RestController
+      public static class TriggerController {
+
+          /**
+           * This endpoint triggers framework internal processing.
+           * The vulnerability occurs in the framework's parameter binding/processing,
+           * not in this user code.
+           */
+          @GetMapping("/trigger")
+          public String triggerFrameworkProcessing(@RequestParam("param") String value) {
+              // By the time this code executes, the framework has already processed
+              // the request using its internal components. If the vulnerability was
+              // triggered, it happened during framework processing above.
+              return "Framework processed parameter: " + value;
+          }
+      }
+  }
+  ```
+  {% endblock %}
+
+  {% block output_format %}
+  ## README.md Structure:
+
+  ```markdown
+  # CVE-{{ cve_id }}: {{ summary }}
+
+  ## Classification: FRAMEWORK-INTERNAL
+
+  ### Vulnerability Details
+  - **CVE ID**: {{ cve_id }}
+  - **Package**: {{ package_name }} {{ package_version }}
+  - **Type**: {{ vulnerability_type }}
+  - **Severity**: [From OSV data]
+
+  ### Framework-Internal Limitation
+
+  This vulnerability exists in **{{ package_name }}'s internal framework code**, specifically in:
+  - [List framework-internal classes from GitHub fixes]
+  - [Explain which component: interceptor/filter/resolver/etc.]
+
+  **Why user code cannot demonstrate this**:
+  1. The vulnerability is in framework internal processing classes
+  2. These components execute during framework request handling, before user code
+  3. User application code cannot directly access or modify these framework internals
+
+  ### How the Framework Processes Requests
+
+  [Explain the request lifecycle and where the vulnerability occurs]
+
+  Example for Spring parameter binding vulnerability:
+  1. HTTP request arrives at DispatcherServlet
+  2. DispatcherServlet selects handler method
+  3. **→ RequestParamMethodArgumentResolver processes @RequestParam (VULNERABLE)**
+  4. User controller method executes (after vulnerability may have triggered)
+
+  ### Demonstration Approach
+
+  This application:
+  - Uses the vulnerable {{ package_name }} version {{ package_version }}
+  - Creates endpoints that trigger framework internal processing
+  - Documents the expected vulnerability behavior
+  - Provides educational value about framework architecture
+
+  ### Validation Strategy
+
+  Since user code cannot demonstrate the vulnerability directly, validation focuses on:
+  1. **Framework Version Verification**: Confirm vulnerable version is loaded
+     - Check classpath: `mvn dependency:tree`
+     - Verify at runtime: Log framework version on startup
+  2. **Component Execution**: Verify framework component processes requests
+     - Framework logs show parameter binding/filtering executed
+     - Request reaches user code (proves framework processed it)
+  3. **Exploit Behavior**: Send malicious input patterns
+     - Monitor framework logs for internal errors
+     - Check for framework-specific error messages
+     - Observe server behavior (crashes, exceptions in framework code)
+
+  ### Value
+
+  This demonstration teaches:
+  - Not all CVEs can be fully demonstrated in user code
+  - Framework architecture and request processing lifecycle
+  - Difference between application-level and framework-internal vulnerabilities
+
+  ### References
+  {{ references }}
+
+  ### GitHub Context
+  [Summary of fix commits showing framework-internal changes]
+  ```
+
+  ## GENERATE BOTH ARTIFACTS NOW:
+
+  1. The minimal trigger application (Java files)
+  2. The comprehensive README.md explaining the limitation
+
+  Be honest about the limitation while providing maximum educational value.
+  {% endblock %}
+
+  {% block educational_context %}
+  {% include 'educational_context_framework_internal' %}
+  {% endblock %}
+
+examples: []

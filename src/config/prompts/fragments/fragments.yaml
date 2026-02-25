@@ -1,0 +1,430 @@
+metadata:
+  name: template_fragments
+  version: 1.0.0
+  description: Reusable prompt fragments for template composition
+  author: FORGE Framework
+  last_updated: '2025-11-03'
+
+# Reusable prompt fragments
+# These can be included in templates to avoid duplication
+fragments:
+  version_guidance_section:
+    content: |
+      ## VERSION-SPECIFIC API REQUIREMENTS:
+      {version_guidance}
+
+      **CRITICAL**: You MUST use the exact APIs, classes, and methods specified above for version {package_version}.
+      Do NOT use APIs from other versions. When in doubt, refer to the version guidance above.
+    description: "Version-specific API guidance section"
+    variables: ["version_guidance", "package_version"]
+
+  github_context_instructions:
+    content: |
+      ## GitHub Context Analysis:
+      {github_context}
+
+      **IMPORTANT**: If GitHub fix commits are provided above, study them carefully to understand:
+      - What code patterns were vulnerable
+      - What changes fixed the vulnerability
+      - How to reproduce the vulnerable behavior
+    description: "GitHub context with fix commit analysis instructions"
+    variables: ["github_context"]
+
+  json_output_format:
+    content: |
+      ## OUTPUT FORMAT:
+      Return your response as a JSON object with this exact structure:
+
+      ```json
+      {{
+        "MainApplication.java": "... full code ...",
+        "VulnerableEndpoint.java": "... full code ...",
+        "pom.xml": "... full Maven POM ...",
+        "README.md": "... setup instructions ..."
+      }}
+      ```
+
+      **CRITICAL**:
+      - Use exact filenames as JSON keys
+      - Provide COMPLETE, WORKING code (not snippets)
+      - Include ALL necessary files
+      - Ensure code compiles and runs
+    description: "Standard JSON output format for code generation"
+    variables: []
+
+  security_education_context:
+    content: |
+      # Historical Code Pattern Analysis
+
+      You are analyzing historical code patterns from specific software versions to understand how certain behaviors manifested in those versions. Your task is to create code that exhibits the exact behavior patterns documented in the CVE database for research and analysis in isolated test environments.
+      
+      This analysis helps security researchers understand how software behaviors evolved across versions.
+    description: "Security education context and ethical framing"
+    variables: []
+
+  output_quality_requirements:
+    content: |
+      ## CODE QUALITY REQUIREMENTS:
+
+      1. **Complete and Compilable**:
+         - All imports must be correct
+         - No placeholder methods or TODO comments
+         - Code must compile without errors
+
+      2. **Proper Maven/Gradle Configuration**:
+         - Correct dependency versions
+         - Proper plugin configuration
+         - Valid groupId/artifactId
+
+      3. **Clear Documentation**:
+         - README.md with setup and run instructions
+         - Comments explaining vulnerable code sections
+         - Description of how to trigger the vulnerability
+
+      4. **Working Example**:
+         - Application starts successfully
+         - Endpoints are accessible
+         - Vulnerability is exploitable
+    description: "Code quality and completeness requirements"
+    variables: []
+
+  vulnerability_type_guidance:
+    content: |
+      ## Vulnerability Type: {vulnerability_type}
+
+      {% if vulnerability_type == "deserialization" %}
+      **Deserialization Vulnerability Guidelines**:
+      - Accept serialized objects from user input
+      - Use vulnerable deserialization methods (ObjectInputStream, XStream, etc.)
+      - Do NOT validate object types before deserialization
+      - Include gadget chain classes in dependencies if applicable
+      {% elif vulnerability_type == "sql_injection" %}
+      **SQL Injection Guidelines**:
+      - Build SQL queries using string concatenation
+      - Include user input directly in queries
+      - Do NOT use PreparedStatement or parameterized queries
+      - Ensure database connection is established
+      {% elif vulnerability_type == "xxe" %}
+      **XXE (XML External Entity) Guidelines**:
+      - Parse XML from user input
+      - Enable external entity processing
+      - Do NOT disable entity resolution
+      - Include DTD processing
+      {% elif vulnerability_type == "path_traversal" %}
+      **Path Traversal Guidelines**:
+      - Accept file paths from user input
+      - Do NOT sanitize or validate paths
+      - Use File operations directly
+      - Allow directory traversal with ../
+      {% elif vulnerability_type == "command_injection" %}
+      **Command Injection Guidelines**:
+      - Execute system commands with user input
+      - Use Runtime.exec() or ProcessBuilder
+      - Do NOT sanitize command arguments
+      - Include command output in response
+      {% endif %}
+    description: "Vulnerability type-specific guidance"
+    variables: ["vulnerability_type"]
+
+  framework_integration_notes:
+    content: |
+      ## Framework Integration:
+      {% if framework_context %}
+      {framework_context}
+
+      **Integration Requirements**:
+      - Follow framework conventions and patterns
+      - Use framework-specific annotations and configurations
+      - Ensure compatibility with framework version
+      - Include framework-required boilerplate
+      {% else %}
+      This is a standalone application. No framework integration required.
+      {% endif %}
+    description: "Framework integration guidance"
+    variables: ["framework_context"]
+
+  cwe_classification:
+    content: |
+      ## CWE Classification:
+      {% if cwe_descriptions %}
+      {cwe_descriptions}
+
+      **Relevance**: Ensure your vulnerable code demonstrates the weakness(es) listed above.
+      {% else %}
+      CWE classification not available for this vulnerability.
+      {% endif %}
+    description: "CWE classification information"
+    variables: ["cwe_descriptions"]
+
+  reference_analysis:
+    content: |
+      ## Vulnerability References:
+      {references}
+
+      **Analysis Instructions**:
+      - Review each reference for technical details
+      - Look for code examples and exploitation techniques
+      - Identify root cause explanations
+      - Note any version-specific information
+    description: "Vulnerability reference links with analysis instructions"
+    variables: ["references"]
+
+  protocol_server_requirements:
+    content: |
+      ## Protocol Server Requirements:
+      {% if protocol_type %}
+      **Protocol Type**: {protocol_type}
+
+      **Protocol-Specific Requirements**:
+      - Implement protocol server using Spring Boot
+      - Create protocol handler/endpoint
+      - Configure protocol-specific properties
+      - Ensure protocol vulnerability is triggerable
+      - Use appropriate protocol libraries
+      {% endif %}
+    description: "Protocol server-specific requirements"
+    variables: ["protocol_type"]
+
+  container_setup_instructions:
+    content: |
+      ## Container Setup:
+
+      The application will be containerized using Docker/Podman. Ensure:
+
+      1. **Build Process**:
+         - Application builds successfully with Maven/Gradle
+         - All dependencies are resolved
+         - Artifacts are created in target/ or build/ directory
+
+      2. **Runtime Requirements**:
+         - Application starts on designated port (8080 by default)
+         - Health checks pass
+         - Endpoints are accessible from host
+
+      3. **Configuration**:
+         - Externalized configuration via application.properties/yml
+         - Environment variables supported where needed
+         - Logging configured appropriately
+    description: "Container deployment setup instructions"
+    variables: []
+
+  version_api_requirements:
+    content: |
+      ## VERSION-SPECIFIC API REQUIREMENTS:
+
+      {{ version_guidance }}
+
+      **YOU MUST USE THE EXACT CODE PATTERNS ABOVE. Using wrong APIs will cause compilation failures.**
+    description: "Version-specific API requirements with strict compliance warning"
+    variables: ["version_guidance"]
+    usage_count: 5
+    used_in: ["vulnerability_generation", "protocol_vulnerability_generation", "framework_internal_doc", "code_adaptation", "file_regeneration"]
+
+  security_context_block:
+    content: |
+      ## Security Context:
+      - CVE ID: {{ cve_id }}
+      - Package: {{ package_name }} {{ package_version }}
+      - Summary: {{ summary }}
+      - Description: {{ description }}
+      {% if vulnerability_type %}
+      - Vulnerability Type: {{ vulnerability_type }}
+      {% endif %}
+      {% if cwe_ids %}
+      - CWE IDs: {{ cwe_ids }}
+      {% endif %}
+      {% if protocol_type %}
+      - Protocol: {{ protocol_type }}
+      {% endif %}
+      {% if severity %}
+      - Severity: {{ severity }}
+      {% endif %}
+      {% if references %}
+      - References: {{ references }}
+      {% endif %}
+    description: "Unified security context block with all vulnerability metadata"
+    variables: ["cve_id", "package_name", "package_version", "summary", "description", "vulnerability_type", "cwe_ids", "protocol_type", "severity", "references"]
+    usage_count: 4
+    used_in: ["vulnerability_generation", "protocol_vulnerability_generation", "framework_internal_doc", "llm_poc_generation"]
+
+  github_context_analysis_base:
+    content: |
+      ## GitHub Context Analysis:
+
+      {{ github_context }}
+    description: "Base GitHub context section (use with specialized usage instructions)"
+    variables: ["github_context"]
+    usage_count: 4
+    used_in: ["vulnerability_generation", "protocol_vulnerability_generation", "framework_internal_doc", "code_adaptation"]
+
+  github_usage_instructions_generic:
+    content: |
+      **HOW TO USE GITHUB CONTEXT:**
+
+      1. **Read Issues First** - Issues contain detailed vulnerability descriptions and how it works
+      2. **Examine Code Diffs** - '+' lines show fixes, '-' lines show vulnerable patterns
+      3. **Understand the Mechanism** - What code pattern causes the vulnerability?
+      4. **Identify the Vulnerable Component** - Is it in user code or framework internals?
+      5. **Generate Pre-Fix Code** - Demonstrate the vulnerable behavior
+    description: "Generic GitHub context usage instructions"
+    variables: []
+    usage_count: 3
+    used_in: ["vulnerability_generation", "llm_poc_generation"]
+
+  github_usage_protocol_specific:
+    content: |
+      **CRITICAL**: Read the GitHub issues and fix commits carefully. They will describe:
+      - Which protocol handler has the vulnerability
+      - What sequence of operations triggers it
+      - What internal components are affected
+      - How the fix changed the protocol handling
+
+      The vulnerable code (lines marked with '-' in diffs) shows what to implement.
+    description: "Protocol-specific GitHub context usage instructions"
+    variables: []
+    usage_count: 1
+    used_in: ["protocol_vulnerability_generation"]
+
+  github_usage_framework_internal:
+    content: |
+      **READ CAREFULLY**: The GitHub context will show fixes in framework internal classes like:
+      - `*Interceptor.java` - Framework interceptor chain
+      - `*Filter.java` - Framework filter processing
+      - `*Resolver.java` - Framework parameter/argument resolvers
+      - Internal processing classes that user code doesn't directly access
+
+      This confirms the vulnerability is in framework internals, not user code.
+    description: "Framework-internal specific GitHub context usage instructions"
+    variables: []
+    usage_count: 1
+    used_in: ["framework_internal_doc"]
+
+  github_usage_adaptation:
+    content: |
+      **GitHub Vulnerability Analysis**:
+      - Study the vulnerable code patterns (lines marked with '-')
+      - Understand what made the code vulnerable
+      - Your adaptation MUST preserve the vulnerability mechanism
+      - Do NOT accidentally fix the vulnerability during adaptation
+    description: "Code adaptation specific GitHub context usage instructions"
+    variables: []
+    usage_count: 1
+    used_in: ["code_adaptation"]
+
+  cwe_classification_block:
+    content: |
+      ## VULNERABILITY CLASSIFICATION:
+
+      **CWE IDs:** {{ cwe_ids }}
+      {% if cwe_descriptions %}
+      **CWE Descriptions:**
+      {{ cwe_descriptions }}
+      {% endif %}
+
+      **Vulnerability Description:**
+      {{ description }}
+    description: "CWE classification block with descriptions"
+    variables: ["cwe_ids", "cwe_descriptions", "description"]
+    usage_count: 2
+    used_in: ["vulnerability_generation", "code_adaptation"]
+
+  cwe_usage_warnings:
+    content: |
+      **CWE IDs are indicators, not templates** - Use them to understand the vulnerability category, but implement the SPECIFIC mechanism from the CVE description and GitHub commits.
+
+      **Common Pitfalls to Avoid:**
+
+      1. **Don't implement generic vulnerability patterns** based on CWE IDs alone
+         - CWE-22 doesn't always mean "use ../ in paths"
+         - CWE-434 doesn't always mean "write files with FileOutputStream"
+         - CWE-502 doesn't always mean "use ObjectInputStream"
+         - CWE-404 doesn't always mean "create HTTP/2 streams"
+         - Read the GitHub context to understand the ACTUAL mechanism
+
+      2. **Don't ignore the CVE-specific details** - The CWE category is broad; the CVE is specific
+
+      3. **Don't use example code from CWE descriptions** - Generate code based on the GitHub fix commits
+    description: "Anti-pattern warnings for CWE usage"
+    variables: []
+    usage_count: 2
+    used_in: ["vulnerability_generation", "protocol_vulnerability_generation"]
+
+  educational_context_generic:
+    content: |
+      ## Educational Context:
+
+      This code is for authorized security research and educational purposes:
+      - Demonstrates security concepts in controlled environments
+      - Helps security professionals understand software behavior
+      - Runs in isolated Docker containers for safe testing
+    description: "Generic educational context statement"
+    variables: []
+    usage_count: 2
+    used_in: ["vulnerability_generation", "protocol_vulnerability_generation"]
+
+  educational_context_protocol:
+    content: |
+      ## Educational Context:
+
+      This code is for authorized security research and educational purposes:
+      - Demonstrates protocol-level vulnerability mechanisms in controlled environments
+      - Helps security professionals understand server-internal vulnerabilities
+      - Runs in isolated Docker containers for safe testing
+      - Purpose is educational vulnerability understanding, not exploitation
+    description: "Protocol-specific educational context statement"
+    variables: []
+    usage_count: 1
+    used_in: ["protocol_vulnerability_generation"]
+
+  educational_context_framework_internal:
+    content: |
+      ## Educational Context:
+
+      This documentation is for authorized security research and education:
+      - Explains why some CVEs cannot be fully demonstrated in user code
+      - Helps security professionals understand framework architecture
+      - Provides realistic expectations for vulnerability research
+      - Purpose is educational understanding, not false demonstrations
+    description: "Framework-internal specific educational context statement"
+    variables: []
+    usage_count: 1
+    used_in: ["framework_internal_doc"]
+
+  vulnerability_preservation_principles:
+    content: |
+      ## CRITICAL: Vulnerability Preservation
+
+      **DO NOT FIX THE VULNERABILITY**:
+      - The adapted code MUST remain vulnerable
+      - Preserve the exact vulnerability mechanism from the original
+      - Do NOT add input validation, sanitization, or security checks
+      - Do NOT use secure alternatives (e.g., PreparedStatement for SQL injection)
+
+      **Portable Paths**:
+      - Use relative paths, not absolute paths
+      - Paths should work in any environment (container, local, etc.)
+      - Example: Use `./uploads/` not `/var/app/uploads/`
+    description: "Vulnerability preservation principles for code adaptation"
+    variables: []
+    usage_count: 2
+    used_in: ["code_adaptation", "file_regeneration"]
+
+  endpoint_metadata_compliance:
+    content: |
+      ## ENDPOINT METADATA REQUIREMENTS:
+
+      **MANDATORY**: You MUST extract and use the exact endpoint details from APPLICATION ENDPOINTS above:
+      1. **Path** - Use the EXACT path (e.g., `/api/upload`, not `/upload`)
+      2. **Method** - Use the EXACT HTTP method (GET, POST, PUT, DELETE)
+      3. **Content-Type** - Use the EXACT Content-Type header
+      4. **Parameters** - Use the EXACT parameter names and types
+
+      **DO NOT**:
+      - Invent new endpoints or paths
+      - Change HTTP methods
+      - Guess Content-Type values
+      - Use generic defaults unless explicitly specified
+    description: "Endpoint metadata compliance requirements"
+    variables: []
+    usage_count: 3
+    used_in: ["llm_poc_generation", "vulnerability_generation", "code_adaptation"]

@@ -1,0 +1,123 @@
+metadata:
+  name: protocol_detection
+  version: 2.0.0
+  description: Protocol type detection patterns for vulnerability classification
+  author: FORGE Framework
+  last_updated: '2025-11-03'
+protocol_patterns:
+  http2:
+    keywords:
+    - http/2
+    - http2
+    - h2c
+    - http2 protocol
+    - http/2 stream
+    package_keywords:
+    - http2
+    - h2
+    display_name: HTTP/2
+    description: HTTP/2 protocol vulnerabilities
+  websocket:
+    keywords:
+    - websocket
+    - ws://
+    - wss://
+    - websocket protocol
+    - websocket frame
+    package_keywords:
+    - websocket
+    - ws
+    display_name: WebSocket
+    description: WebSocket protocol vulnerabilities
+  grpc:
+    keywords:
+    - grpc
+    - protobuf
+    - grpc protocol
+    - protocol buffer
+    package_keywords:
+    - grpc
+    - protobuf
+    display_name: gRPC
+    description: gRPC protocol vulnerabilities
+  remoting:
+    keywords:
+    - remoting
+    - remoting protocol
+    - jboss remoting
+    - remote invocation
+    package_keywords:
+    - remoting
+    - jboss-remoting
+    display_name: Remoting Protocol
+    description: JBoss Remoting or similar RPC protocols
+  smtp:
+    keywords:
+    - smtp
+    - mail
+    - email protocol
+    - simple mail
+    package_keywords:
+    - smtp
+    - mail
+    display_name: SMTP/Mail
+    description: SMTP or mail protocol vulnerabilities
+  ldap:
+    keywords:
+    - ldap
+    - directory
+    - ldap protocol
+    package_keywords:
+    - ldap
+    - directory
+    display_name: LDAP
+    description: LDAP protocol vulnerabilities
+  ftp:
+    keywords:
+    - ftp
+    - file transfer
+    - ftp protocol
+    package_keywords:
+    - ftp
+    display_name: FTP
+    description: FTP protocol vulnerabilities
+  mqtt:
+    keywords:
+    - mqtt
+    - message queue
+    - iot protocol
+    package_keywords:
+    - mqtt
+    display_name: MQTT
+    description: MQTT messaging protocol
+  amqp:
+    keywords:
+    - amqp
+    - advanced message
+    - rabbitmq
+    package_keywords:
+    - amqp
+    - rabbitmq
+    display_name: AMQP
+    description: Advanced Message Queuing Protocol
+  kafka:
+    keywords:
+    - kafka
+    - kafka protocol
+    - kafka stream
+    package_keywords:
+    - kafka
+    display_name: Kafka Protocol
+    description: Apache Kafka messaging protocol
+package_protocol_mappings:
+  netty: Netty Protocol
+  undertow: Undertow Protocol
+  jetty: Jetty Protocol
+  tomcat: Tomcat Protocol
+  io.netty: Netty Protocol
+  io.undertow: Undertow Protocol
+  org.eclipse.jetty: Jetty Protocol
+  org.apache.tomcat: Tomcat Protocol
+fallback:
+  display_name: Protocol Server
+  description: Generic protocol server vulnerability

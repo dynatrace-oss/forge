@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Standalone JAR Template for Library Vulnerability Demonstrations
+
+    This template is used for library-specific vulnerabilities that don't require
+    a web framework. It creates a simple Java application with HTTP endpoints using
+    embedded Jetty server for validation purposes.
+
+    Features:
+    - Minimal dependencies (no heavy frameworks)
+    - Embedded Jetty for HTTP access (required for validation)
+    - Suitable for library vulnerabilities (serialization, parsing, etc.)
+    - Quick build and startup times
+    - Low memory footprint
+
+    Use cases:
+    - Deserialization vulnerabilities in libraries
+    - XML/YAML/JSON parsing vulnerabilities
+    - Utility library vulnerabilities
+    - Compression library vulnerabilities
+    - Any library that doesn't require a full web framework
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.cve-emulator</groupId>
+    <artifactId>{{ artifact_id }}-standalone</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>{{ java_version }}</maven.compiler.source>
+        <maven.compiler.target>{{ java_version }}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jetty.version>9.4.51.v20230217</jetty.version>
+        <java.version>{{ java_version }}</java.version>
+    </properties>
+
+    <!-- Dynamic repositories -->
+    {{ repositories }}
+
+    <dependencies>
+        <!-- Vulnerable dependency - automatically populated -->
+        <dependency>
+            <groupId>{{ group_id }}</groupId>
+            <artifactId>{{ artifact_id }}</artifactId>
+            <version>{{ package_version }}</version>
+        </dependency>
+
+        <!-- Embedded Jetty for HTTP endpoints (required for validation) -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+
+        <!-- Additional dependencies - automatically detected -->
+        {{ dependencies }}
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>{{ main_class }}</mainClass>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>{{ main_class }}</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,45 @@
+FILE:src/main/resources/application.properties
+# Spring Boot Configuration
+server.port=8080
+server.servlet.context-path=/vuln-app
+
+# Security Configuration (intentionally insecure for demo)
+spring.security.user.name=admin
+spring.security.user.password=password
+spring.security.user.roles=USER,ADMIN
+
+# Database Configuration
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA Configuration
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+
+FILE:src/main/java/VulnApplication.java
+package com.example.vuln;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
+
+@SpringBootApplication
+public class VulnApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(VulnApplication.class, args);
+    }
+}
+
+@RestController
+@RequestMapping("/api")
+class VulnerableController {
+
+    @PostMapping("/vulnerable")
+    public String vulnerableEndpoint(@RequestBody String data) {
+        // Vulnerability demonstration code will be injected here
+        return "Processing: " + data;
+    }
+}

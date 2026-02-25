@@ -1,0 +1,102 @@
+metadata:
+  name: blueprint_creation
+  version: 2.0.0
+  description: Generate blueprint metadata from vulnerability data
+  category: blueprint_management
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - blueprint_management
+placeholders:
+  required:
+  - cve_id
+  - description
+  - package_name
+  - package_version
+  - references
+  - summary
+  optional:
+  - dependencies_section
+  - dependency_context
+  - similar_examples
+template: '# Blueprint Metadata Enhancement Prompt
+
+
+  You are an expert security researcher helping to create comprehensive metadata for
+  blueprints of vulnerable applications. Based on the vulnerability information provided,
+  generate enhanced metadata in a JSON format.
+
+
+  ## Vulnerability Information:
+
+  - CVE ID: {{ cve_id }}
+
+  - Package: {{ package_name }} {{ package_version }}
+
+  - Summary: {{ summary }}
+
+  - Description: {{ description }}
+
+  - References: {{ references }}
+
+
+  ## Additional Context:
+
+  {{ dependencies_section|default("") }}
+
+
+  {{ dependency_context|default("") }}
+
+
+  {{ similar_examples|default("") }}
+
+
+  ## Required Output:
+
+  Generate a JSON object with the following properties:
+
+
+  1. "name": Descriptive name for the blueprint
+
+  2. "vulnerability_type": Categorize the vulnerability (e.g., "Buffer Overflow",
+  "SQL Injection", "XSS", "Deserialization", etc.)
+
+  3. "attack_vector": How the vulnerability is exploited (e.g., "Network", "Local",
+  "Adjacent Network", "Physical", etc.)
+
+  4. "impact": The potential impact of exploitation (e.g., "Code Execution", "Information
+  Disclosure", "Denial of Service", etc.)
+
+  5. "complexity": Difficulty of exploitation (e.g., "Low", "Medium", "High")
+
+  6. "required_privileges": Privileges needed to exploit (e.g., "None", "Low", "High")
+
+  7. "user_interaction": Whether user interaction is required (true/false)
+
+  8. "cwe_ids": Array of related CWE IDs (e.g., ["CWE-89", "CWE-20"])
+
+  9. "mitigation_strategy": Brief description of how to mitigate this vulnerability
+
+  10. "detection_methods": Array of methods to detect exploitation attempts
+
+  11. "suggested_tags": Array of relevant tags for categorization (e.g., ["injection",
+  "remote-code-execution", "java"])
+
+  12. "exploitation_likelihood": Assessment of how likely the vulnerability is to
+  be exploited ("Low", "Medium", "High")
+
+  13. "affected_components": Array of the specific components affected
+
+  14. "framework_type": Web framework type for HTTP-based demonstration ("spring-boot",
+  "struts", "jenkins", "micronaut", "quarkus", "web-application", or "unknown" - standalone
+  not supported)
+
+  15. "dependency_impact": If additional dependencies are provided, describe their
+  relevance to the vulnerability
+
+
+  Format your response as valid JSON. Be concise but comprehensive in your analysis.
+  Consider the additional dependencies and similar examples when generating metadata.
+
+  '
+examples: []

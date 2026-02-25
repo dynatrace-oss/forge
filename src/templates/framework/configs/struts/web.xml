@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+         http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+
+    <!-- Struts 2 Filter Configuration -->
+    <!-- Filter class is determined by template manager based on package version: -->
+    <!-- Struts 2.0.x-2.1.2: org.apache.struts2.dispatcher.FilterDispatcher -->
+    <!-- Struts 2.1.3-2.4.x: org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter -->
+    <!-- Struts 2.5+, 6.x: org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter -->
+    <filter>
+        <filter-name>struts2</filter-name>
+        <filter-class>{{ struts_filter_class }}</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>struts2</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+</web-app>

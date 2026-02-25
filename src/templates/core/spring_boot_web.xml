@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Core template for Spring Boot web applications -->
+    <!-- Designed for web vulnerabilities and modern Java applications -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>{{ spring_boot_version }}</version>
+        <relativePath/>
+    </parent>
+
+    <!-- Use org.cve-emulator groupId to avoid conflict with vulnerable package -->
+    <!-- Project coordinates MUST be different from dependency coordinates -->
+    <groupId>org.cve-emulator</groupId>
+    <artifactId>{{ artifact_id }}-web-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Vulnerability Demo - {{ package_name }} (Spring Boot)</name>
+    <description>Spring Boot web application demonstrating vulnerability in {{ package_name }} {{ package_version }}</description>
+
+    <properties>
+        <java.version>{{ java_version }}</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-boot.version>{{ spring_boot_version }}</spring-boot.version>
+        <maven.compiler.source>{{ java_version }}</maven.compiler.source>
+        <maven.compiler.target>{{ java_version }}</maven.compiler.target>
+    </properties>
+
+    <!-- Repositories section for package-specific repositories -->
+    {{ repositories }}
+
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            {% if servlet_container and servlet_container != "tomcat" %}
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+            {% endif %}
+        </dependency>
+
+        {% if servlet_container == "undertow" %}
+        <!-- Undertow servlet container (replaces Tomcat) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        {% elif servlet_container == "jetty" %}
+        <!-- Jetty servlet container (replaces Tomcat) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+        {% elif servlet_container == "netty" %}
+        <!-- Reactor Netty (for WebFlux - replaces Tomcat) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        {% endif %}
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- JSON processing for REST APIs -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+
+        <!-- Validation for request handling -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Main vulnerability package dependency -->
+        <!-- Will be dynamically customized based on package requirements -->
+        {{ dependencies }}
+
+        <!-- Development tools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Configuration processor -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Testing dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- This dependency does NOT exist in Spring Boot 2.7.x (only added in 3.1+) -->
+        <!-- It was causing Maven dependency resolution failures blocking 100% of builds -->
+    </dependencies>
+
+    <build>
+        <finalName>{{ artifact_id }}-${project.version}</finalName>
+        
+        <plugins>
+            <!-- Spring Boot Maven Plugin -->
+            <!-- Default attach=true makes repackaged fat JAR replace the thin JAR -->
+            <!-- layout=JAR forces creation of executable fat JAR with BOOT-INF structure -->
+            <!-- Single 'mvn package' command creates fat JAR directly -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>{{ main_class }}</mainClass>
+                    <layout>JAR</layout>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Compiler plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire plugin for testing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>false</skipTests>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- Failsafe plugin for integration tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- The maven-jar-plugin with custom archive configuration was interfering with -->
+            <!-- Spring Boot Maven Plugin's repackage goal, preventing fat JAR creation. -->
+            <!-- Spring Boot Maven Plugin handles all JAR packaging internally - no separate -->
+            <!-- maven-jar-plugin configuration needed-->
+
+            <!-- Dependency plugin for analyzing dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Profiles for different deployment scenarios -->
+    <profiles>
+        <!-- Development profile -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profiles.active>dev,vulnerability-demo</spring.profiles.active>
+                <logging.level.org.springframework>DEBUG</logging.level.org.springframework>
+                <server.port>8080</server.port>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- Production profile -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <spring.profiles.active>prod,vulnerability-demo</spring.profiles.active>
+                <logging.level.org.springframework>WARN</logging.level.org.springframework>
+                <server.port>8080</server.port>
+            </properties>
+        </profile>
+
+        <!-- Container profile for Docker deployment -->
+        <profile>
+            <id>container</id>
+            <properties>
+                <spring.profiles.active>container,vulnerability-demo</spring.profiles.active>
+                <server.port>8080</server.port>
+                <management.endpoints.web.exposure.include>health,info,metrics,env</management.endpoints.web.exposure.include>
+            </properties>
+        </profile>
+
+        <!-- Security disabled profile for vulnerability testing -->
+        <profile>
+            <id>vulnerability-testing</id>
+            <properties>
+                <spring.profiles.active>vulnerability-testing</spring.profiles.active>
+                <spring.autoconfigure.exclude>org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration</spring.autoconfigure.exclude>
+                <management.security.enabled>false</management.security.enabled>
+            </properties>
+        </profile>
+    </profiles>
+</project>

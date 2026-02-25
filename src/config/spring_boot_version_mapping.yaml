@@ -1,0 +1,139 @@
+# Spring Framework to Spring Boot Version Mapping Configuration
+#
+# This file maps Spring Framework versions to compatible Spring Boot versions.
+# CRITICAL for Spring Framework CORE packages (spring-core, spring-web, spring-expression, etc.)
+#
+# The version selection strategy:
+# 1. Spring Framework 6.x requires Spring Boot 3.x and Java 17+
+# 2. Spring Framework 5.x requires Spring Boot 2.x and Java 11+
+# 3. Exact minor version compatibility is crucial for avoiding runtime errors
+
+spring_framework_to_boot:
+  # ===================================================================
+  # Spring Framework 6.x → Spring Boot 3.x (Java 17+ required)
+  # ===================================================================
+
+  # Spring Framework 6.2.x (Latest)
+  "6.2":
+    spring_boot: "3.3.5"
+    java: "17"
+    notes: "Spring Framework 6.2.x requires Spring Boot 3.3+. Minimum Java 17."
+
+  # Spring Framework 6.1.x
+  "6.1":
+    spring_boot: "3.2.5"
+    java: "17"
+    notes: "Spring Framework 6.1.x requires Spring Boot 3.2.5+ for full compatibility. Tested with 6.1.10 + 3.2.5 successfully."
+    exclude_dependencies:
+      - "org.springframework:spring-web"
+      - "org.springframework:spring-webmvc"
+    pin_explicitly: true
+
+  # Spring Framework 6.0.x
+  "6.0":
+    spring_boot: "3.0.13"
+    java: "17"
+    notes: "Spring Framework 6.0.x requires Spring Boot 3.0.x. 3.0.13 is the last stable 3.0 release."
+
+  # ===================================================================
+  # Spring Framework 5.x → Spring Boot 2.x (Java 11+ required)
+  # ===================================================================
+
+  # Spring Framework 5.3.x (Most common 5.x version)
+  "5.3":
+    spring_boot: "2.7.18"
+    java: "11"
+    notes: "Spring Framework 5.3.x is the default for Spring Boot 2.7.x. Fully compatible."
+
+  # Spring Framework 5.2.x (Older 5.x version)
+  "5.2":
+    spring_boot: "2.3.12.RELEASE"
+    java: "8"
+    notes: "Spring Framework 5.2.x requires Spring Boot 2.3.x. Spring Boot 2.3.12 includes Spring 5.2.15, binary compatible with 5.2.25."
+
+  # Spring Framework 5.1.x
+  "5.1":
+    spring_boot: "2.1.18.RELEASE"
+    java: "8"
+    notes: "Spring Framework 5.1.x requires Spring Boot 2.1.x. Binary compatible within 5.1.x range."
+
+  # Spring Framework 5.0.x
+  "5.0":
+    spring_boot: "2.0.9.RELEASE"
+    java: "8"
+    notes: "Spring Framework 5.0.x requires Spring Boot 2.0.x. Java 8 compatible."
+
+  # ===================================================================
+  # Spring Framework 4.x → Spring Boot 1.5.x (Legacy)
+  # ===================================================================
+
+  # Spring Framework 4.3.x
+  "4.3":
+    spring_boot: "1.5.22.RELEASE"
+    java: "8"
+    notes: "Spring Framework 4.3.x requires Spring Boot 1.5.x. Last 1.5.x release."
+
+# Fallback configurations when exact version is not found
+fallback:
+  # Used when Spring Framework version is 6.x but not in mapping
+  spring_6_and_above:
+    spring_boot: "3.2.5"
+    java: "17"
+    notes: "Generic Spring 6.x fallback. Works for most Spring 6.x versions."
+
+  # Used when Spring Framework version is 5.x or below but not in mapping
+  spring_5_and_below:
+    spring_boot: "2.7.18"
+    java: "11"
+    notes: "Generic Spring 5.x fallback. Works for most Spring 5.3.x versions."
+
+# Version compatibility notes
+compatibility_notes: |
+  IMPORTANT VERSION COMPATIBILITY RULES:
+
+  1. Spring Framework 6.x + Spring Boot 3.x = Java 17 MINIMUM
+     - Spring 6.0.x → Spring Boot 3.0.x
+     - Spring 6.1.x → Spring Boot 3.2.x
+     - Spring 6.2.x → Spring Boot 3.3.x
+
+  2. Spring Framework 5.x + Spring Boot 2.x = Java 11 RECOMMENDED (Java 8+ supported)
+     - Spring 5.2.x → Spring Boot 2.5.x or 2.6.x
+     - Spring 5.3.x → Spring Boot 2.7.x (default for 2.7.18)
+
+  3. Spring Framework 4.x + Spring Boot 1.5.x = Java 8 ONLY
+
+  4. CRITICAL: Never mix major versions (e.g., Spring 5.x with Spring Boot 3.x)
+
+  5. Use dependencyManagement section to override Spring Framework version:
+     <dependencyManagement>
+       <dependencies>
+         <dependency>
+           <groupId>org.springframework</groupId>
+           <artifactId>spring-core</artifactId>
+           <version>6.1.2</version>
+         </dependency>
+       </dependencies>
+     </dependencyManagement>
+
+# Known issues and workarounds
+known_issues:
+  spring_6_1_x_with_boot_3_1_x:
+    issue: "Spring Framework 6.1.x is incompatible with Spring Boot 3.1.x and below"
+    symptom: "NoClassDefFoundError: org/springframework/core/annotation/AnnotatedMethod at runtime"
+    fix: "Use Spring Boot 3.2.5+ and explicitly exclude/pin spring-web and spring-webmvc dependencies"
+    tested: "CVE-2025-41234 (spring-web 6.1.10 + Spring Boot 3.2.5) - VERIFIED WORKING"
+
+  spring_6_1_2_with_boot_3_4_0:
+    issue: "Spring Framework 6.1.2 is incompatible with Spring Boot 3.4.0"
+    symptom: "Container builds but exits immediately with BeanCreationException"
+    fix: "Use Spring Boot 3.2.5 instead (defined in mapping above)"
+
+  spring_5_2_x_with_boot_2_7_x:
+    issue: "Spring Framework 5.2.x may have transitive dependency conflicts with Spring Boot 2.7.x"
+    symptom: "Container may fail with MethodNotFoundException or ClassNotFoundException"
+    fix: "Use Spring Boot 2.5.15 instead (defined in mapping above)"
+
+  tomcat_11_x_compatibility:
+    issue: "Tomcat 11.x is very new and may not be well-supported by older Spring Boot versions"
+    symptom: "Container exits immediately"
+    fix: "Ensure Spring Boot 3.x is used with Tomcat 11.x"

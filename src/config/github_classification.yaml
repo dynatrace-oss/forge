@@ -1,0 +1,127 @@
+# GitHub Commit Classification Configuration
+# Used for distinguishing fix commits from exploit demonstrations
+# Follows config-driven design pattern used throughout FORGE framework
+
+commit_classification:
+  # Fix commit indicators
+  fix_indicators:
+    # Keywords in commit messages that indicate a fix
+    commit_message_keywords:
+      - fix
+      - patch
+      - resolve
+      - address
+      - prevent
+      - mitigate
+      - security
+      - vulnerability
+      - improvement
+      - restrict
+      - update
+      - correct
+
+    # Regex patterns in commit messages that indicate a fix
+    commit_message_patterns:
+      - 'add.*limit'
+      - 'add.*validation'
+      - 'add.*check'
+      - 'cve-'
+      - 'gh-\d+'  # GitHub issue references
+      - 'issue.*#\d+'  # Issue number references
+
+    # Code change patterns that indicate a fix (NOT CVE-specific)
+    code_change_patterns:
+      # Generic patterns for security fixes
+      - 'if\s*\(\s*\w+\s*>\s*\d+'  # Size/limit checks
+      - 'if\s*\(\s*\w+\s*<\s*\d+'  # Minimum checks
+      - 'MAX_\w+\s*='  # Maximum constant definitions
+      - 'MIN_\w+\s*='  # Minimum constant definitions
+      - 'throw\s+new\s+\w*Exception'  # Exception throwing (validation)
+      - '\+\s*assert'  # Adding assertions
+      - '\+\s*if\s*\('  # Adding conditional checks
+      - 'validate\('  # Validation method calls
+      - 'sanitize\('  # Sanitization method calls
+      - 'checkBounds\('  # Bounds checking
+      - '\.matches\('  # Pattern matching/validation
+
+  # Exploit commit indicators
+  exploit_indicators:
+    # Keywords that indicate exploit/PoC code
+    commit_message_keywords:
+      - exploit
+      - poc
+      - proof of concept
+      - proof-of-concept
+      - demonstration
+      - attack
+      - payload
+      - malicious
+      - test case
+      - reproducer
+      - repro
+
+  # Confidence thresholds for classification
+  confidence_thresholds:
+    # Minimum matches needed to classify as fix commit
+    fix_commit_min_keyword_matches: 1
+    fix_commit_min_code_pattern_matches: 2
+
+    # Minimum matches needed to classify as exploit commit
+    exploit_commit_min_keyword_matches: 1
+
+# Reference URL filtering patterns
+reference_filtering:
+  # Priority order for processing GitHub references
+  url_priorities:
+    commit:
+      priority: 1
+      pattern: '/commit/'
+      description: "Commit URLs show exact vulnerability and fixes"
+
+    issue:
+      priority: 2
+      pattern: '/issues/'
+      description: "Issues have vulnerability discussions"
+
+    security_advisory:
+      priority: 3
+      patterns:
+        - '/security/'
+        - '/advisories/'
+      description: "Official security advisories"
+
+    pull_request:
+      priority: 5
+      pattern: '/pull/'
+      description: "PRs may have test cases"
+
+    explicit_poc:
+      priority: 4
+      patterns:
+        - 'exploit'
+        - 'poc'
+      description: "Explicit PoC references (for context, not code)"
+
+    exploit_db:
+      priority: 6
+      patterns:
+        - 'exploit-db.com'
+        - 'packetstormsecurity.com'
+      description: "Exploit databases"
+
+    repository:
+      priority: 7
+      pattern: 'github.com/[^/]+/[^/]+/?$'
+      description: "Main repository pages"
+
+# Rate limiting and request settings
+rate_limiting:
+  delay_between_requests_seconds: 2.0
+  max_references_per_vulnerability: 10
+  request_timeout_seconds: 30
+
+# Cache settings
+caching:
+  enabled: true
+  retention_days: 7
+  cache_directory: "data/github_context_cache"

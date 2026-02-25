@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  JBoss Remoting Configuration
+  Enables WildFly remoting protocol support for Undertow server
+
+  This config is required for CVEs affecting:
+  - org.wildfly.httpclient:wildfly-http-client-common
+  - io.undertow:undertow-core (remoting protocol)
+  - Connection lifecycle management vulnerabilities
+  - Remote invocation vulnerabilities
+
+  Usage: Automatically included when protocol_type = "Remoting Protocol" or "WildFly Remoting"
+-->
+<remoting xmlns="urn:jboss:remoting:5.0">
+    <endpoint name="default">
+        <!-- Connection listeners for protocol handling -->
+        <connection-provider name="http-remoting">
+            <!-- Vulnerability trigger: Large message sizes may trigger buffer overflow CVEs -->
+            <property name="max-inbound-message-size" value="1048576"/>
+            <property name="max-outbound-message-size" value="1048576"/>
+        </connection-provider>
+
+        <!-- Worker thread pool configuration -->
+        <!-- Vulnerability trigger: Thread exhaustion, resource consumption CVEs -->
+        <worker thread-pool-size="10"/>
+    </endpoint>
+
+    <!-- Server configuration -->
+    <server>
+        <!-- Vulnerability trigger: Buffer size manipulation for protocol-level CVEs -->
+        <option name="receive-buffer-size" value="8192"/>
+        <option name="send-buffer-size" value="8192"/>
+    </server>
+</remoting>

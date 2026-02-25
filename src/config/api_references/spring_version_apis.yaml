@@ -1,0 +1,51 @@
+# Spring Framework Version-Specific API Reference
+# Used for generating version-appropriate code
+
+spring:
+  # Spring 6.x (2022+) - Jakarta EE migration
+  "6":
+    description: "Spring 6.x with Jakarta EE (jakarta.* packages)"
+    servlet_package: "jakarta.servlet"
+    persistence_package: "jakarta.persistence"
+    java_min_version: "17"
+
+    critical_changes:
+      - "ALL javax.* imports become jakarta.*"
+      - "Requires Java 17 or higher"
+      - "Spring Boot 3.x required for Spring 6.x"
+
+    example_imports:
+      - "jakarta.servlet.http.HttpServletRequest"
+      - "jakarta.servlet.http.HttpServletResponse"
+      - "jakarta.persistence.Entity"
+
+    critical_warnings:
+      - "NEVER use javax.* imports in Spring 6.x - compilation will fail"
+      - "Use jakarta.* for all Java EE APIs"
+
+  # Spring 5.x (2017-2022) - Last javax.* version
+  "5":
+    description: "Spring 5.x with Java EE (javax.* packages)"
+    servlet_package: "javax.servlet"
+    persistence_package: "javax.persistence"
+    java_min_version: "8"
+    java_recommended: "11"
+
+    example_imports:
+      - "javax.servlet.http.HttpServletRequest"
+      - "javax.servlet.http.HttpServletResponse"
+      - "javax.persistence.Entity"
+
+    compatibility:
+      spring_boot: "2.x series"
+
+  # Spring 4.x (2013-2020) - Legacy
+  "4":
+    description: "Spring 4.x legacy version"
+    servlet_package: "javax.servlet"
+    persistence_package: "javax.persistence"
+    java_min_version: "6"
+    java_recommended: "8"
+
+    compatibility:
+      spring_boot: "1.5.x series"

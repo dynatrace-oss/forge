@@ -1,0 +1,190 @@
+# This configuration controls how build outputs and system logs are filtered
+# to reduce noise and extract only relevant information for debugging and error recovery
+
+# Build Log Filtering Rules
+build_log_filters:
+  maven:
+    # Patterns to exclude from logs (high-noise, low-value content)
+    exclude_patterns:
+      - "^Progress \\(\\d+\\):"  # Maven download progress indicators
+      - "^Downloaded from central:"  # Successful downloads
+      - "^Downloading from central:"  # Download initiation messages
+      - "^\\s*\\r?\\n$"  # Empty lines and carriage returns
+      - "^\\s*Progress \\(\\d+\\): .*?\\r$"  # Progress with carriage returns
+      - "^\\s*Progress \\(\\d+\\): .*?kB.*?\\r?$"  # Download progress with sizes
+      - "^\\s+\\r?$"  # Whitespace-only lines
+      - "\\[INFO\\] Downloading from.*maven.*repository"  # Repository download messages
+      - "\\[INFO\\] Downloaded from.*maven.*repository"  # Repository download completion
+      
+    # Patterns to always include (critical information)
+    include_patterns:
+      - "\\[ERROR\\]"  # All error messages
+      - "\\[WARN\\]"   # All warning messages
+      - "BUILD FAILURE"  # Build failure indicators
+      - "BUILD SUCCESS"  # Build success indicators
+      - "\\[INFO\\] Building"  # Project building start
+      - "\\[INFO\\] Scanning for projects"  # Maven scan start
+      - "\\[INFO\\] BUILD SUCCESS"  # Successful build completion
+      - "\\[INFO\\] BUILD FAILURE"  # Failed build completion
+      - "\\[INFO\\] Total time:"  # Build timing information
+      - "compilation failure"  # Compilation errors
+      - "Could not resolve"  # Dependency resolution failures
+      - "No compiler is provided"  # Java compilation issues
+      - "package .* does not exist"  # Missing package errors
+      - "cannot find symbol"  # Symbol resolution errors
+      - "class file has wrong version"  # Version compatibility issues
+      
+    # Summarization rules for excluded content
+    summarize:
+      dependency_downloads: true  # Summarize dependency download counts
+      progress_indicators: false  # Don't summarize progress (just remove)
+      download_sizes: true  # Summarize total download sizes
+      timing_info: true  # Preserve build timing
+      
+    # Maximum lines to preserve for debugging context
+    max_context_lines: 200
+    
+    # Error context - lines to include around errors
+    error_context_lines:
+      before: 2
+      after: 3
+
+  # Docker/Podman build filtering
+  container:
+    exclude_patterns:
+      - "^STEP \\d+/\\d+:"  # Step indicators (keep only errors)
+      - "^--> Using cache"  # Cache usage messages
+      - "^--> [a-f0-9]{12}$"  # Container layer IDs
+      - "^\\s*$"  # Empty lines
+      
+    include_patterns:
+      - "ERROR"  # All error messages
+      - "WARN"   # All warnings
+      - "FAILED" # Failure indicators
+      - "No such file"  # File not found errors
+      - "permission denied"  # Permission issues
+      - "cannot access"  # Access issues
+      - "RUN.*failed"  # Failed RUN commands
+      
+    summarize:
+      cache_usage: true
+      step_completion: true
+      
+    max_context_lines: 100
+    error_context_lines:
+      before: 1
+      after: 2
+
+# Error Recovery Log Processing
+error_recovery:
+  # Critical patterns that indicate actionable errors
+  critical_patterns:
+    dependency_issues:
+      - "Could not resolve dependencies"
+      - "Failed to read artifact descriptor"
+      - "No versions available"
+      - "Blocked mirror"
+      
+    compilation_errors:
+      - "compilation failure"
+      - "package .* does not exist"
+      - "cannot find symbol"
+      - "class .* is public, should be declared in a file named"
+      
+    runtime_errors:
+      - "ClassNotFoundException"
+      - "NoSuchMethodError"
+      - "NoClassDefFoundError"
+      - "UnsupportedClassVersionError"
+      
+    container_errors:
+      - "No such file or directory"
+      - "permission denied"
+      - "cannot access"
+      - "Exit code [1-9]"
+      
+  # Summary generation for error analysis
+  error_summary:
+    max_errors_per_type: 5  # Limit similar errors in summary
+    include_stack_traces: false  # Exclude full stack traces from summary
+    include_line_numbers: true  # Include line numbers for code errors
+    context_radius: 2  # Lines of context around each error
+
+# System Log Filtering (application logs)
+system_log_filters:
+  # LLM service log filtering
+  llm_service:
+    exclude_patterns:
+      - "HTTP Request: POST.*openai.*200 OK"  # Successful API calls
+      - "Provided keys for the prompt template"  # Template key logging
+      
+    include_patterns:
+      - "WARNING"
+      - "ERROR"
+      - "CRITICAL"
+      - "Failed to"
+      - "Timeout"
+      - "Authentication"
+      - "Rate limit"
+      
+  # Container service log filtering
+  container_service:
+    exclude_patterns:
+      - "Creating following directory path"  # Directory creation messages
+      - "Using cache"  # Cache usage messages
+      - "Building container.*from"  # Build initiation messages
+      - "Log processor initialized"  # Initialization messages
+      
+    include_patterns:
+      - "WARNING"
+      - "ERROR"  
+      - "FAILED"
+      - "Build.*failed"
+      - "Container.*failed"
+      - "Build output filtered"  # Keep filtering statistics
+      
+  # Exploit validation service log filtering  
+  exploit_validation_service:
+    exclude_patterns:
+      - "Found \\d+ total running containers"  # Container count messages
+      - "Container health check: is_running="  # Health check details
+      - "Container info: name="  # Container details unless error
+      
+    include_patterns:
+      - "WARNING"
+      - "ERROR"
+      - "CRITICAL" 
+      - "DUPLICATE PREVENTION"  # Keep important workflow messages
+      - "BUILD AUTHORIZED"
+      - "CONTAINER REUSE SUCCESS"
+      - "Starting validation for blueprint"
+      - "✅|❌|⚠️|🚨|🔍|🎯|🏗️"  # Keep emoji-marked important messages
+
+# Performance Settings
+performance:
+  # Maximum log size to process (in MB)
+  max_log_size_mb: 50
+  
+  # Chunk size for processing large logs
+  chunk_size_lines: 1000
+  
+  # Enable parallel processing for large logs
+  parallel_processing: true
+  
+  # Cache filtered logs for repeated access
+  enable_caching: true
+  cache_ttl_hours: 24
+
+# Debugging and Development
+debug:
+  # Preserve full logs in debug mode
+  preserve_full_logs: false
+  
+  # Log filtering statistics
+  enable_filter_stats: true
+  
+  # Validate filter patterns on startup
+  validate_patterns: true
+  
+  # Debug output for filter development
+  debug_filter_matching: false

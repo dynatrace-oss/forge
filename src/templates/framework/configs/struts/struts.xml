@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+    <!-- Vulnerability Demonstration Package -->
+    <package name="vuln" extends="struts-default">
+
+        <!-- Main vulnerability trigger endpoint -->
+        <action name="vulnerable" class="{{ action_class_name }}">
+            <result name="success">/success.jsp</result>
+            <result name="error">/error.jsp</result>
+        </action>
+
+        <!-- Health check endpoint for container validation -->
+        <action name="health" class="{{ action_class_name }}">
+            <result name="success">/health.jsp</result>
+        </action>
+
+    </package>
+</struts>

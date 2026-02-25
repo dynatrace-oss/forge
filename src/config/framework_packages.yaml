@@ -1,0 +1,209 @@
+# Framework Package Classification
+# Distinguishes between framework-level packages and application libraries
+
+# Spring Framework Core Packages
+# These ARE the framework itself - cannot be added as explicit dependencies to Spring Boot apps
+spring_framework_core_packages:
+  - org.springframework:spring-core
+  - org.springframework:spring-web
+  - org.springframework:spring-webmvc
+  - org.springframework:spring-context
+  - org.springframework:spring-beans
+  - org.springframework:spring-aop
+  - org.springframework:spring-expression
+  - org.springframework:spring-jdbc
+  - org.springframework:spring-orm
+  - org.springframework:spring-tx
+  - org.springframework:spring-test
+  - org.springframework:spring-messaging
+  - org.springframework:spring-websocket
+  - org.springframework:spring-jms
+  - org.springframework.boot:spring-boot
+
+# Spring Security Packages
+# These complement Spring Framework - use spring_boot_web template
+spring_security_packages:
+  - org.springframework.security:spring-security-core
+  - org.springframework.security:spring-security-web
+  - org.springframework.security:spring-security-crypto
+  - org.springframework.security:spring-security-config
+  - org.springframework.security:spring-security-oauth2-core
+
+# Apache Struts Core Packages
+# These define the Struts framework - require WAR packaging and servlet container
+struts_core_packages:
+  - org.apache.struts:struts2-core
+  - org.apache.struts:struts2-convention-plugin
+  - org.apache.struts:struts2-config-browser-plugin
+  - org.apache.struts:struts2-json-plugin
+  - org.apache.struts:struts2-rest-plugin
+  - org.apache.struts:struts-core
+  - org.apache.struts:struts-extras
+  - org.apache.struts:struts-taglib
+
+# Micronaut Core Packages
+# These define the Micronaut framework - require microservice native template
+micronaut_core_packages:
+  - io.micronaut:micronaut-core
+  - io.micronaut:micronaut-http
+  - io.micronaut:micronaut-http-server
+  - io.micronaut:micronaut-http-server-netty
+  - io.micronaut:micronaut-inject
+  - io.micronaut:micronaut-runtime
+  - io.micronaut:micronaut-validation
+  - io.micronaut:micronaut-router
+
+# Quarkus Core Packages
+# These define the Quarkus framework - require microservice native template
+quarkus_core_packages:
+  - io.quarkus:quarkus-core
+  - io.quarkus:quarkus-arc
+  - io.quarkus:quarkus-resteasy
+  - io.quarkus:quarkus-vertx-http
+  - io.quarkus:quarkus-resteasy-reactive
+  - io.quarkus:quarkus-undertow
+  - io.quarkus:quarkus-netty
+
+# Servlet Container / Web Server Packages
+# These are web servers that can be tested for vulnerabilities
+servlet_container_packages:
+  - io.undertow:undertow-core
+  - io.undertow:undertow-servlet
+  - io.undertow:undertow-websockets-jsr
+
+  # Eclipse Jetty
+  - org.eclipse.jetty:jetty-server
+  - org.eclipse.jetty:jetty-servlet
+  - org.eclipse.jetty:jetty-webapp
+
+  # Apache Tomcat (when testing Tomcat itself)
+  - org.apache.tomcat.embed:tomcat-embed-core
+  - org.apache.tomcat.embed:tomcat-embed-websocket
+  - org.apache.tomcat:tomcat-coyote
+
+  # Eclipse Jetty (additional modules)
+  - org.eclipse.jetty:jetty-http
+
+  # Netty (when testing Netty directly, not via framework)
+  - io.netty:netty-codec-http
+  - io.netty:netty-codec-http2
+  - io.netty:netty-handler
+  - io.netty:netty-all
+
+  # Vert.x (reactive toolkit with embedded server)
+  - io.vertx:vertx-core
+  - io.vertx:vertx-web
+
+  # Reactor Netty
+  - io.projectreactor.netty:reactor-netty-http
+  - io.projectreactor.netty:reactor-netty-core
+
+# Servlet container type detection rules
+servlet_container_detection:
+  undertow:
+    - io.undertow
+  jetty:
+    - org.eclipse.jetty
+  tomcat:
+    - org.apache.tomcat.embed
+  netty:
+    - io.netty
+    - io.projectreactor.netty
+
+# Application Library Packages
+# These are libraries used BY applications - safe to add as explicit dependencies
+# Can be added to any framework (Spring Boot, Struts, standalone)
+application_library_packages:
+  # JSON processing
+  - com.fasterxml.jackson.core:jackson-databind
+  - com.fasterxml.jackson.core:jackson-core
+  - com.fasterxml.jackson.core:jackson-annotations
+  - com.google.code.gson:gson
+  - org.json:json
+
+  # YAML processing
+  - org.yaml:snakeyaml
+
+  # Serialization
+  - com.thoughtworks.xstream:xstream
+  - org.apache.commons:commons-collections4
+
+  # Utilities
+  - commons-io:commons-io
+  - org.apache.commons:commons-lang3
+  - commons-lang:commons-lang
+  - com.google.guava:guava
+
+  # Logging
+  - org.slf4j:slf4j-api
+  - org.slf4j:slf4j-simple
+  - ch.qos.logback:logback-classic
+  - ch.qos.logback:logback-core
+  - log4j:log4j
+  - org.apache.logging.log4j:log4j-core
+
+  # XML processing
+  - org.dom4j:dom4j
+  - dom4j:dom4j
+  - xerces:xercesImpl
+  - xalan:xalan
+  - org.apache.santuario:xmlsec
+
+  # HTTP clients
+  - org.apache.httpcomponents:httpclient
+  - org.apache.httpcomponents:httpcore
+
+  # Messaging
+  - org.apache.activemq:activemq-client
+  - org.apache.activemq:activemq-broker
+  - org.apache.kafka:kafka-clients
+
+  # HTML parsing
+  - org.jsoup:jsoup
+
+  # PDF processing
+  - org.apache.pdfbox:pdfbox
+
+  # Cryptography
+  - org.bouncycastle:bcprov-jdk15on
+  - org.bouncycastle:bcprov-jdk18on
+
+  # Database drivers
+  - com.h2database:h2
+  - com.mysql:mysql-connector-j
+  - org.postgresql:postgresql
+
+  # Web services / REST
+  - org.apache.cxf:cxf-core
+  - org.apache.cxf:cxf-rt-databinding-aegis
+  - org.jboss.resteasy:resteasy-jaxrs
+  - axis:axis
+
+  # Validation
+  - org.hibernate:hibernate-validator
+
+  # Bean utilities
+  - commons-beanutils:commons-beanutils
+
+  # Compression
+  - org.apache.commons:commons-compress
+
+  # Template engines
+  - org.freemarker:freemarker
+  - org.apache.velocity:velocity-engine-core
+
+# Package Type Detection Rules
+detection_rules:
+  # If package matches spring_framework_core_packages, use spring_framework_native template
+  # If package matches struts_core_packages, use servlet_container template
+  # If package matches micronaut_core_packages, use microservice_native template
+  # If package matches quarkus_core_packages, use microservice_native template
+  # If package matches application_library_packages, use standalone_jar or spring_boot_web template
+
+  priority_order:
+    - spring_framework_core_packages
+    - spring_security_packages
+    - struts_core_packages
+    - micronaut_core_packages
+    - quarkus_core_packages
+    - application_library_packages

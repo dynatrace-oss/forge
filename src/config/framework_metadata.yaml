@@ -1,0 +1,355 @@
+# Framework Metadata Configuration
+# This file externalizes all hardcoded framework-specific logic to enable
+# full extensibility. New frameworks can be added via YAML edits only.
+
+# =============================================================================
+# FRAMEWORK DEFINITIONS
+# =============================================================================
+
+frameworks:
+  # ---------------------------------------------------------------------------
+  # SPRING BOOT
+  # ---------------------------------------------------------------------------
+  spring_boot:
+    display_name: "Spring Boot"
+    main_class_name: "VulnApplication"
+    base_package: "com.vuln"
+
+    # Common dependencies for Spring Boot applications
+    dependencies:
+      common:
+        - group_id: "org.springframework.boot"
+          artifact_id: "spring-boot-starter-web"
+          scope: null
+        - group_id: "org.springframework.boot"
+          artifact_id: "spring-boot-starter-test"
+          scope: "test"
+
+    # Containerfile configuration
+    containerfile:
+      base_image: "eclipse-temurin:{{java_version}}-jre"
+      expose_port: 8080
+      jar_pattern: "target/*.jar"
+      cmd: ["java", "-jar", "/app/application.jar"]
+      health_check: "curl -f http://localhost:8080/actuator/health || exit 1"
+
+    # Template selection rules (evaluated in order)
+    template_selection:
+      rules:
+        # Spring Framework core packages need special dependencyManagement template
+        - package_pattern: "org.springframework:spring-core"
+          template: "spring_framework_native.xml"
+        - package_pattern: "org.springframework:spring-web"
+          template: "spring_framework_native.xml"
+        - package_pattern: "org.springframework:spring-webmvc"
+          template: "spring_framework_native.xml"
+        - package_pattern: "org.springframework:spring-context"
+          template: "spring_framework_native.xml"
+        # Spring Boot packages use the web template
+        - package_pattern: "org.springframework.boot"
+          template: "spring_boot_web.xml"
+        - package_pattern: "spring"
+          template: "spring_boot_web.xml"
+
+  # ---------------------------------------------------------------------------
+  # APACHE STRUTS
+  # ---------------------------------------------------------------------------
+  apache_struts:
+    display_name: "Apache Struts"
+    main_class_name: "VulnerableAction"
+    base_package: "com.vuln"
+
+    # Version-specific rules for filter class selection
+    version_rules:
+      filter_class:
+        # Struts 6.x and 2.5+ use the modern filter
+        - version_range: "6.0.0+"
+          class: "org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter"
+        - version_range: "2.5.0-5.99.99"
+          class: "org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter"
+        # Struts 2.1.3-2.4.x use the ng.filter variant
+        - version_range: "2.1.3-2.4.99"
+          class: "org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter"
+        # Struts 2.0.x-2.1.2 use the deprecated FilterDispatcher
+        - version_range: "0.0.0-2.1.2"
+          class: "org.apache.struts2.dispatcher.FilterDispatcher"
+
+    # Containerfile configuration (WAR packaging with Tomcat)
+    containerfile:
+      base_image: "tomcat:9.0-jre{{java_version}}"
+      expose_port: 8080
+      war_pattern: "target/*.war"
+      deploy_path: "/usr/local/tomcat/webapps/ROOT.war"
+      cmd: ["catalina.sh", "run"]
+      health_check: "curl -f http://localhost:8080/ || exit 1"
+
+    # Template selection rules
+    template_selection:
+      rules:
+        - package_pattern: "org.apache.struts"
+          template: "servlet_container.xml"
+        - package_pattern: "struts"
+          template: "servlet_container.xml"
+
+  # ---------------------------------------------------------------------------
+  # JENKINS PLUGIN
+  # ---------------------------------------------------------------------------
+  jenkins_plugin:
+    display_name: "Jenkins Plugin"
+    main_class_name: "VulnerablePlugin"
+    base_package: "com.vuln"
+
+    # Jenkins uses HPI packaging
+    containerfile:
+      base_image: "jenkins/jenkins:lts-jdk{{java_version}}"
+      expose_port: 8080
+      hpi_pattern: "target/*.hpi"
+      deploy_path: "/var/jenkins_home/plugins/"
+      cmd: null  # Uses Jenkins default CMD
+
+    template_selection:
+      rules:
+        - package_pattern: "org.jenkins-ci"
+          template: "standalone_jar.xml"
+
+  # ---------------------------------------------------------------------------
+  # MICRONAUT
+  # ---------------------------------------------------------------------------
+  micronaut:
+    display_name: "Micronaut"
+    main_class_name: "Application"
+    base_package: "com.vuln"
+
+    dependencies:
+      common:
+        - group_id: "io.micronaut"
+          artifact_id: "micronaut-http-server-netty"
+          scope: null
+
+    containerfile:
+      base_image: "eclipse-temurin:{{java_version}}-jre"
+      expose_port: 8080
+      jar_pattern: "target/*.jar"
+      cmd: ["java", "-jar", "/app/application.jar"]
+
+    template_selection:
+      rules:
+        - package_pattern: "io.micronaut"
+          template: "microservice_native.xml"
+
+  # ---------------------------------------------------------------------------
+  # QUARKUS
+  # ---------------------------------------------------------------------------
+  quarkus:
+    display_name: "Quarkus"
+    main_class_name: "Application"
+    base_package: "com.vuln"
+
+    dependencies:
+      common:
+        - group_id: "io.quarkus"
+          artifact_id: "quarkus-resteasy"
+          scope: null
+
+    containerfile:
+      base_image: "eclipse-temurin:{{java_version}}-jre"
+      expose_port: 8080
+      jar_pattern: "target/*-runner.jar"
+      cmd: ["java", "-jar", "/app/application.jar"]
+
+    template_selection:
+      rules:
+        - package_pattern: "io.quarkus"
+          template: "microservice_native.xml"
+
+  # ---------------------------------------------------------------------------
+  # PROTOCOL SERVER (Protocol-level vulnerabilities)
+  # ---------------------------------------------------------------------------
+  protocol_server:
+    display_name: "Protocol Server"
+    main_class_name: "ProtocolServer"
+    base_package: "com.vuln.protocol"
+
+    containerfile:
+      base_image: "eclipse-temurin:{{java_version}}-jre"
+      expose_port: 8080
+      jar_pattern: "target/*.jar"
+      maven_build: true  # Protocol servers need Maven Shade build stage
+      cmd: ["java", "-jar", "/app/application.jar"]
+
+    # Protocol servers use protocol_type classification for template selection
+    template_selection:
+      rules:
+        # Priority: protocol_type over package_pattern
+        - protocol_type: "Remoting Protocol"
+          template: "remoting_protocol_server.xml"
+        - protocol_type: "HTTP/2"
+          template: "http2_server.xml"
+        - protocol_type: "HTTP2"
+          template: "http2_server.xml"
+        - protocol_type: "WebSocket"
+          template: "websocket_server.xml"
+        - protocol_type: "Websocket"
+          template: "websocket_server.xml"
+        # Fallback to package patterns
+        - package_pattern: "undertow"
+          template: "remoting_protocol_server.xml"
+        - package_pattern: "io.netty"
+          template: "standalone_jar.xml"
+        - package_pattern: "netty-codec"
+          template: "standalone_jar.xml"
+        - package_pattern: "tomcat-embed"
+          template: "standalone_jar.xml"
+        - package_pattern: "tomcat.embed"
+          template: "standalone_jar.xml"
+        - package_pattern: "tomcat-coyote"
+          template: "standalone_jar.xml"
+        - package_pattern: "org.eclipse.jetty"
+          template: "standalone_jar.xml"
+
+  # ---------------------------------------------------------------------------
+  # STANDALONE_JAR (Library vulnerabilities)
+  # ---------------------------------------------------------------------------
+  standalone_jar:
+    display_name: "Standalone JAR"
+    main_class_name: "VulnerableDemo"
+    base_package: "com.vuln"
+
+    containerfile:
+      base_image: "eclipse-temurin:{{java_version}}-jre"
+      expose_port: 8080
+      jar_pattern: "target/*.jar"
+      cmd: ["java", "-jar", "/app/application.jar"]
+
+    template_selection:
+      rules:
+        # Library packages (no framework integration needed)
+        - package_pattern: "jackson"
+          template: "standalone_jar.xml"
+        - package_pattern: "guava"
+          template: "standalone_jar.xml"
+        - package_pattern: "logback"
+          template: "standalone_jar.xml"
+        - package_pattern: "slf4j"
+          template: "standalone_jar.xml"
+        - package_pattern: "commons"
+          template: "standalone_jar.xml"
+        - package_pattern: "snakeyaml"
+          template: "standalone_jar.xml"
+        # Serialization / XML
+        - package_pattern: "xstream"
+          template: "standalone_jar.xml"
+        - package_pattern: "dom4j"
+          template: "standalone_jar.xml"
+        - package_pattern: "xalan"
+          template: "standalone_jar.xml"
+        - package_pattern: "xerces"
+          template: "standalone_jar.xml"
+        - package_pattern: "xmlsec"
+          template: "standalone_jar.xml"
+        # Cryptography
+        - package_pattern: "bouncycastle"
+          template: "standalone_jar.xml"
+        # HTTP clients
+        - package_pattern: "httpclient"
+          template: "standalone_jar.xml"
+        # Database drivers
+        - package_pattern: "h2database"
+          template: "standalone_jar.xml"
+        - package_pattern: "mysql"
+          template: "standalone_jar.xml"
+        - package_pattern: "postgresql"
+          template: "standalone_jar.xml"
+        # PDF processing
+        - package_pattern: "pdfbox"
+          template: "standalone_jar.xml"
+        # Validation
+        - package_pattern: "hibernate"
+          template: "standalone_jar.xml"
+        # Web services / REST
+        - package_pattern: "resteasy"
+          template: "standalone_jar.xml"
+        - package_pattern: "cxf"
+          template: "standalone_jar.xml"
+        - package_pattern: "axis"
+          template: "standalone_jar.xml"
+        # HTML parsing
+        - package_pattern: "jsoup"
+          template: "standalone_jar.xml"
+        # Messaging
+        - package_pattern: "activemq"
+          template: "standalone_jar.xml"
+        # Reactive toolkit
+        - package_pattern: "vertx"
+          template: "standalone_jar.xml"
+
+  # ---------------------------------------------------------------------------
+  # KAFKA CLIENT
+  # ---------------------------------------------------------------------------
+  kafka_client:
+    display_name: "Kafka Client"
+    main_class_name: "KafkaVulnApp"
+    base_package: "com.vuln"
+
+    dependencies:
+      common:
+        - group_id: "org.apache.kafka"
+          artifact_id: "kafka-clients"
+          scope: null
+        - group_id: "org.apache.kafka"
+          artifact_id: "kafka-streams"
+          scope: null
+
+    containerfile:
+      base_image: "eclipse-temurin:{{java_version}}-jre"
+      expose_port: 8080
+      jar_pattern: "target/*.jar"
+      cmd: ["java", "-jar", "/app/application.jar"]
+
+    template_selection:
+      rules:
+        - package_pattern: "org.apache.kafka:kafka-clients"
+          template: "kafka_client.xml"
+        - package_pattern: "org.apache.kafka:kafka-streams"
+          template: "kafka_client.xml"
+        - package_pattern: "kafka"
+          template: "kafka_client.xml"
+
+# =============================================================================
+# COMMON DEPENDENCIES
+# =============================================================================
+
+# Shared dependencies used across multiple frameworks
+common_dependencies:
+  # Logging frameworks
+  logging:
+    - group_id: "org.slf4j"
+      artifact_id: "slf4j-simple"
+      version: "1.7.36"
+      scope: null
+    - group_id: "org.slf4j"
+      artifact_id: "slf4j-api"
+      version: "1.7.36"
+      scope: null
+
+  # Testing frameworks
+  testing:
+    - group_id: "org.junit.jupiter"
+      artifact_id: "junit-jupiter"
+      version: "5.9.3"
+      scope: "test"
+    - group_id: "org.junit.jupiter"
+      artifact_id: "junit-jupiter-api"
+      version: "5.9.3"
+      scope: "test"
+
+# =============================================================================
+# FALLBACK CONFIGURATION
+# =============================================================================
+
+# Default fallback values when framework-specific config not found
+fallback:
+  main_class_name: "VulnerableDemo"
+  template: "standalone_jar.xml"
+  base_image: "eclipse-temurin:{{java_version}}-jre"
+  expose_port: 8080

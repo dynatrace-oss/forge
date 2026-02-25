@@ -1,0 +1,138 @@
+metadata:
+  name: framework_selection
+  version: 2.0.0
+  description: Select appropriate framework for vulnerability
+  category: framework
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - framework
+placeholders:
+  required:
+  - cve_ids
+  - package_name
+  - package_version
+  - vulnerability_description
+  - vulnerability_type
+  optional: []
+template: "You are an expert Java security researcher tasked with selecting the optimal\
+  \ framework for demonstrating a specific vulnerability in a containerized environment.\n\
+  \n## Context\nPackage: ${{ package_name }}\nVersion: ${{ package_version }}\nCVE\
+  \ IDs: ${{ cve_ids }}\nVulnerability Type: ${{ vulnerability_type }}\nDescription:\
+  \ ${{ vulnerability_description }}\n\n## Available Web Frameworks\n**ALL vulnerabilities\
+  \ are demonstrated through HTTP-accessible web applications**\n\n1. **SPRING_BOOT**\
+  \ - Modern Spring-based web applications with embedded server\n   - Best for: All\
+  \ vulnerability types via HTTP endpoints, REST APIs, web-based demonstrations\n\
+  \   - Features: Auto-configuration, embedded Tomcat, extensive ecosystem, HTTP endpoint\
+  \ support\n   - Complexity: Low to moderate setup complexity\n   - HTTP Features:\
+  \ Built-in web server, REST controllers, form handling, JSON/XML processing\n\n\
+  2. **APACHE_STRUTS** - Traditional MVC web framework \n   - Best for: Struts-specific\
+  \ vulnerabilities, action-based web applications\n   - Features: Action-based architecture,\
+  \ interceptors, result types, web request handling\n   - Complexity: Moderate to\
+  \ high setup complexity\n   - HTTP Features: Action-based endpoints, form processing,\
+  \ web context\n\n3. **MICRONAUT** - Reactive microservices framework\n   - Best\
+  \ for: Microservice vulnerabilities, reactive applications, cloud-native HTTP services\n\
+  \   - Features: Compile-time DI, native image support, low memory footprint, HTTP\
+  \ clients/servers\n   - Complexity: Moderate setup complexity\n   - HTTP Features:\
+  \ Reactive HTTP endpoints, built-in server, REST support\n\n4. **QUARKUS** - Cloud-native\
+  \ Java framework\n   - Best for: Cloud-native vulnerabilities, fast startup web\
+  \ applications\n   - Features: Native compilation, fast startup, low memory usage,\
+  \ HTTP endpoints\n   - Complexity: Moderate setup complexity\n   - HTTP Features:\
+  \ JAX-RS endpoints, embedded server, cloud-native HTTP patterns\n\n5. **WEB_APPLICATION**\
+  \ - Generic web application framework\n   - Best for: Standard web vulnerabilities,\
+  \ servlet-based applications\n   - Features: Standard servlet container, HTTP request/response\
+  \ handling\n   - Complexity: Low setup complexity\n   - HTTP Features: Servlet endpoints,\
+  \ form processing, web context\n\n## Analysis Guidelines\n\n### Vulnerability Type\
+  \ Considerations for HTTP-Based Demonstrations:\n- **Deserialization vulnerabilities**:\
+  \ Create HTTP POST endpoints accepting JSON/YAML/XML payloads for all frameworks\n\
+  - **Web application vulnerabilities**: Direct HTTP endpoint mapping - excellent\
+  \ for all web frameworks\n- **Library-specific vulnerabilities**: Wrap library usage\
+  \ in HTTP endpoints to trigger via web requests\n- **Injection vulnerabilities**:\
+  \ Create form/REST endpoints accepting user input for all web frameworks  \n- **Configuration\
+  \ vulnerabilities**: Expose configuration via HTTP endpoints for web-based testing\n\
+  \n### Package Analysis:\n- Analyze package namespace and typical usage patterns\n\
+  - Consider if package is web-focused or general-purpose library\n- Evaluate framework\
+  \ ecosystem integration\n\n### Framework Selection Criteria:\n1. **Vulnerability\
+  \ Demonstration Effectiveness** (40% weight)\n   - How well does the framework showcase\
+  \ the vulnerability?\n   - Does it provide realistic attack vectors?\n   - Can it\
+  \ demonstrate real-world impact?\n\n2. **Implementation Complexity** (25% weight)\n\
+  \   - How much adaptation is required?\n   - Are there existing patterns for this\
+  \ vulnerability type?\n   - What additional dependencies are needed?\n\n3. **Framework-Package\
+  \ Compatibility** (20% weight)\n   - Is the package commonly used with this framework?\n\
+  \   - Are there known integration patterns?\n   - What's the ecosystem fit?\n\n\
+  4. **Demonstration Value** (15% weight)\n   - Does it show realistic usage scenarios?\n\
+  \   - Can security researchers learn from this demo?\n   - Is it practically relevant?\n\
+  \n## CRITICAL: Response Format Requirements\n\n**YOU MUST RESPOND WITH VALID JSON\
+  \ ONLY. NO ADDITIONAL TEXT OR EXPLANATION.**\n\nYour response must be a single,\
+  \ valid JSON object that starts with { and ends with }. Do not include any text\
+  \ before or after the JSON. Do not wrap the JSON in markdown code blocks.\n\n**REQUIRED\
+  \ JSON FORMAT:**\n\n{\n  \"selected_framework\": \"SPRING_BOOT|APACHE_STRUTS|MICRONAUT|QUARKUS|WEB_APPLICATION\"\
+  ,\n  \"confidence_score\": 0.85,\n  \"rationale\": \"Detailed explanation of why\
+  \ this framework was selected, including specific benefits for this vulnerability\
+  \ type and package combination.\",\n  \"vulnerability_analysis\": {\n    \"vulnerability_category\"\
+  : \"deserialization|web_vulnerability|injection|library_vulnerability|other\",\n\
+  \    \"attack_vector\": \"Description of how the vulnerability would typically be\
+  \ exploited\",\n    \"framework_benefits\": \"Specific advantages this framework\
+  \ provides for demonstrating this vulnerability\",\n    \"demonstration_approach\"\
+  : \"High-level approach for implementing the vulnerability demo\"\n  },\n  \"package_analysis\"\
+  : {\n    \"package_type\": \"web_framework|utility_library|security_library|data_processing|other\"\
+  ,\n    \"typical_usage\": \"How this package is typically used in applications\"\
+  ,\n    \"framework_integration\": \"How well this package integrates with the selected\
+  \ framework\",\n    \"ecosystem_fit\": \"Package's fit within the framework's ecosystem\"\
+  \n  },\n  \"adaptation_strategy\": \"convert_to_web|convert_framework|enhance_native|microservice_pattern|web_endpoint_pattern\"\
+  ,\n  \"estimated_complexity\": \"simple|moderate|complex|advanced\",\n  \"required_changes\"\
+  : [\n    \"List of specific changes needed to adapt the vulnerability code\",\n\
+  \    \"Such as: Add web endpoints, Configure framework security, Implement REST\
+  \ controllers\"\n  ],\n  \"alternative_frameworks\": [\n    {\n      \"framework\"\
+  : \"ALTERNATIVE_FRAMEWORK\",\n      \"suitability_score\": 0.75,\n      \"notes\"\
+  : \"Why this could be an alternative choice\"\n    }\n  ],\n  \"implementation_considerations\"\
+  : {\n    \"dependencies_needed\": [\"List of additional dependencies required\"\
+  ],\n    \"configuration_requirements\": [\"Framework-specific configuration needed\"\
+  ],\n    \"security_considerations\": [\"Security aspects to consider during implementation\"\
+  ],\n    \"performance_impact\": \"Expected performance characteristics\"\n  }\n\
+  }\n\n**EXAMPLES OF CORRECT RESPONSES:**\n\nExample 1:\n{\"selected_framework\":\
+  \ \"SPRING_BOOT\", \"confidence_score\": 0.85, \"rationale\": \"Spring Boot provides\
+  \ excellent support for web vulnerabilities with its embedded server and auto-configuration\
+  \ features.\", \"vulnerability_analysis\": {\"vulnerability_category\": \"web_vulnerability\"\
+  , \"attack_vector\": \"HTTP request manipulation\", \"framework_benefits\": \"Built-in\
+  \ web server and request handling\", \"demonstration_approach\": \"Create REST endpoint\
+  \ to showcase vulnerability\"}, \"package_analysis\": {\"package_type\": \"web_framework\"\
+  , \"typical_usage\": \"Building web applications\", \"framework_integration\": \"\
+  Native Spring ecosystem integration\", \"ecosystem_fit\": \"Perfect fit for Spring\
+  \ Boot applications\"}, \"adaptation_strategy\": \"enhance_native\", \"estimated_complexity\"\
+  : \"simple\", \"required_changes\": [\"Add REST controller\", \"Configure vulnerability\
+  \ endpoint\"], \"alternative_frameworks\": [{\"framework\": \"APACHE_STRUTS\", \"\
+  suitability_score\": 0.7, \"notes\": \"Good alternative for action-based web vulnerabilities\"\
+  }], \"implementation_considerations\": {\"dependencies_needed\": [\"spring-boot-starter-web\"\
+  ], \"configuration_requirements\": [\"Application properties\"], \"security_considerations\"\
+  : [\"Disable CSRF for demo\"], \"performance_impact\": \"Minimal overhead\"}}\n\n\
+  Example 2:\n{\"selected_framework\": \"SPRING_BOOT\", \"confidence_score\": 0.9,\
+  \ \"rationale\": \"Library-specific vulnerability demonstrated through HTTP endpoint\
+  \ for HTTP-based testing.\", \"vulnerability_analysis\": {\"vulnerability_category\"\
+  : \"library_vulnerability\", \"attack_vector\": \"HTTP POST request triggering library\
+  \ method exploitation\", \"framework_benefits\": \"HTTP accessibility for validation\
+  \ and testing\", \"demonstration_approach\": \"REST endpoint accepting payloads\
+  \ that trigger library vulnerability\"}, \"package_analysis\": {\"package_type\"\
+  : \"utility_library\", \"typical_usage\": \"Data processing utility\", \"framework_integration\"\
+  : \"Integrates well via HTTP endpoints\", \"ecosystem_fit\": \"Works with Spring\
+  \ Boot REST patterns\"}, \"adaptation_strategy\": \"web_endpoint_pattern\", \"estimated_complexity\"\
+  : \"simple\", \"required_changes\": [\"Create REST controller\", \"Add HTTP endpoint\
+  \ for vulnerability trigger\", \"Configure payload processing\"], \"alternative_frameworks\"\
+  : [{\"framework\": \"WEB_APPLICATION\", \"suitability_score\": 0.7, \"notes\": \"\
+  Good alternative with servlet endpoints\"}], \"implementation_considerations\":\
+  \ {\"dependencies_needed\": [\"spring-boot-starter-web\", \"target-library\"], \"\
+  configuration_requirements\": [\"Spring Boot configuration\"], \"security_considerations\"\
+  : [\"Ensure vulnerability is contained to demo environment\"], \"performance_impact\"\
+  : \"Minimal\"}}\n\n## Important Guidelines:\n- **ALL vulnerabilities MUST be demonstrated\
+  \ through HTTP endpoints** - this is mandatory\n- Prioritize realistic HTTP-based\
+  \ vulnerability demonstration and testing accessibility\n- Consider how the vulnerability\
+  \ can be triggered via HTTP requests (POST/GET/PUT data)\n- Think about HTTP endpoint\
+  \ design that security researchers can easily test with curl/Postman\n- Balance\
+  \ demonstration effectiveness with HTTP accessibility for validation\n- Provide\
+  \ specific, actionable reasoning focusing on HTTP endpoint implementation\n- Ensure\
+  \ confidence scores reflect genuine assessment for web-based demonstrations (0.6-0.9\
+  \ typical range)\n- Include practical HTTP endpoint implementation considerations\n\
+  - **NEVER select standalone options** - all applications must be web-accessible\n\
+  \nAnalyze the provided vulnerability context and select the most appropriate framework\
+  \ for demonstration."
+examples: []

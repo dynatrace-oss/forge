@@ -1,0 +1,104 @@
+metadata:
+  name: container_generation
+  version: 2.0.0
+  description: Generate Docker container configuration
+  category: container
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - container
+  - deployment
+placeholders:
+  required:
+  - code_snippets_section
+  - cve_ids
+  - description
+  - metadata_section
+  - package_name
+  - package_version
+  optional:
+  - framework_context
+  - template_section
+template: "# Container Generation Prompt\n\nYou are an expert container and build\
+  \ system developer. Your task is to create all necessary files for a containerized\
+  \ vulnerable application based on the provided blueprint information.\nBlueprint\
+  \ Information:\nPackage: ${{ package_name }}\nVersion: ${{ package_version }}\n\
+  CVE IDs: ${{ cve_ids }}\nDescription: ${{ description }}\n${{ metadata_section }}\n\
+  ${{ code_snippets_section }}\n${{ template_section|default(\"\") }}\n\n## Framework\
+  \ Context\n\n${{ framework_context|default(\"\") }}\nImportant Guidelines:\n\n**ALL\
+  \ vulnerabilities MUST be demonstrated through HTTP-accessible web applications**\n\
+  - For library-level vulnerabilities (e.g., deserialization, parsing), create HTTP\
+  \ endpoints that accept payloads triggering the library\n- For web-specific vulnerabilities\
+  \ (e.g., XSS, CSRF, injection), use appropriate web frameworks with HTTP endpoints\n\
+  - For all vulnerability types, create Spring Boot web applications with REST controllers\
+  \ for HTTP accessibility\n- Ensure all containers run on port 8080 and remain accessible\
+  \ for validation and testing\n\n## Required Files for HTTP-Based Vulnerability Demonstrations\n\
+  \n**ALL applications must be Spring Boot web applications with HTTP endpoints**\n\
+  \n1. Spring Boot Web Applications (for ALL vulnerability types):\nGenerate web application\
+  \ structure:\n```file:src/main/java/com/example/VulnApplication.java\npackage com.example;\n\
+  \nimport org.springframework.boot.SpringApplication;\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\n\
+  \n@SpringBootApplication\npublic class VulnApplication {\n    public static void\
+  \ main(String[] args) {\n        SpringApplication.run(VulnApplication.class, args);\n\
+  \    }\n}\n```\n\n```file:src/main/java/com/example/VulnerableController.java\n\
+  package com.example;\n\nimport org.springframework.web.bind.annotation.*;\n\n@RestController\n\
+  @RequestMapping(\"/api\")\npublic class VulnerableController {\n    \n    @PostMapping(\"\
+  /vulnerable\")\n    public String vulnerableEndpoint(@RequestBody String data) {\n\
+  \        // Web-based vulnerability demonstration\n        return \"Result\";\n\
+  \    }\n    \n    // Standard endpoints to prevent false positives during testing\n\
+  \    @GetMapping(\"/\")\n    public String root() {\n        return \"Vulnerability\
+  \ demonstration container is running\";\n    }\n    \n    @GetMapping(\"/api\")\n\
+  \    public String apiRoot() {\n        return \"API endpoints available\";\n  \
+  \  }\n    \n    @PostMapping(\"/api\")\n    public String apiRootPost() {\n    \
+  \    return \"API endpoints available\";\n    }\n    \n    @GetMapping(\"/api/test\"\
+  )\n    public String test() {\n        return \"Test endpoint - GET method\";\n\
+  \    }\n    \n    @PostMapping(\"/api/test\") \n    public String testPost(@RequestBody(required=false)\
+  \ String data) {\n        return \"Test endpoint - POST method\";\n    }\n    \n\
+  \    @GetMapping(\"/api/health\")\n    public String health() {\n        return\
+  \ \"API is healthy\";\n    }\n    \n    @PostMapping(\"/api/health\")\n    public\
+  \ String healthPost() {\n        return \"API is healthy\";\n    }\n}\n```\n\n```file:src/main/resources/application.properties\n\
+  server.port=8080\n#Add vulnerability-specific settings\n```\n\n3. Apache Struts\
+  \ Applications (for Struts-specific vulnerabilities, OGNL injection):\nGenerate\
+  \ Struts application structure:\n```file:src/main/java/com/example/VulnerableAction.java\n\
+  package com.example;\n\npublic class VulnerableAction {\n    private String input;\n\
+  \n    public String execute() {\n        // Struts-specific vulnerability\n    \
+  \    return \"success\";\n    }\n\n    // Getters and setters\n}\n```\n\n```file:src/main/resources/struts.xml\n\
+  <!DOCTYPE struts PUBLIC \"-//Apache Software Foundation//DTD Struts Configuration\
+  \ 2.5//EN\"\n    \"http://struts.apache.org/dtds/struts-2.5.dtd\">\n<struts>\n \
+  \   <package name=\"default\" extends=\"struts-default\">\n        <action name=\"\
+  vulnerable\" class=\"com.example.VulnerableAction\">\n            <result>/result.jsp</result>\n\
+  \        </action>\n    </package>\n</struts>\n```\n\n4. Jenkins Plugin Applications\
+  \ (for Jenkins-specific vulnerabilities):\nGenerate plugin structure as needed.\n\
+  ## HTTP Endpoint Patterns for All Vulnerability Types:\n\n| Vulnerability Type |\
+  \ HTTP Endpoint Pattern | Example Implementation |\n|-------------------|----------------------|----------------------|\n\
+  | Deserialization (library) | POST endpoint accepting JSON/YAML/XML | SnakeYAML,\
+  \ Jackson, XStream via REST endpoints |\n| XML parsing issues | HTTP endpoint processing\
+  \ XML payloads | XXE vulnerabilities via web requests |\n| Web injection (SQL, XSS)\
+  \ | Form/REST endpoints with user input | Web application vulnerabilities via HTTP\
+  \ |\n| REST API vulnerabilities | Spring Boot REST controllers | Authentication\
+  \ bypass, CORS via HTTP |\n| Struts-specific | Apache Struts action endpoints |\
+  \ OGNL injection, S2-* series via web requests |\n| CI/CD specific | Jenkins Plugin\
+  \ web interface | Jenkins CVEs via HTTP endpoints |\nOutput Format Guidelines:\n\
+  \nUse file: markers for each file\nInclude the full path from project root\nKeep\
+  \ code minimal but complete\nAdd comments explaining the vulnerable sections\nIf\
+  \ code snippets exist in the blueprint, adapt them to the chosen structure\n\n##\
+  \ Important Notes\n\nGenerate only the source code files, NOT pom.xml, Containerfile,\
+  \ or README.md\nThese will be generated separately by the template system with appropriate\
+  \ dependencies\nEnsure the vulnerability is clearly demonstrated and exploitable\n\
+  The downstream build process expects standard Maven directory structure\nAll applications\
+  \ use Spring Boot web template with starter-web dependencies\nThe POM will include\
+  \ both Spring Boot web framework and vulnerable library dependencies\nMake sure\
+  \ file paths match Spring Boot web application structure\nAll applications must\
+  \ expose HTTP endpoints for vulnerability triggering\n\nExamples of Correct HTTP-Based\
+  \ Structure Selection:\n\nCVE-2022-1471 (SnakeYAML deserialization):\n- **Choose**:\
+  \ Spring Boot application with REST endpoint  \n- **Reason**: HTTP POST endpoint\
+  \ accepts YAML payloads to trigger deserialization\n- **Implementation**: `/api/parse`\
+  \ endpoint accepting YAML in request body\n\nSQL Injection in web application:\n\
+  - **Choose**: Spring Boot application with form endpoints\n- **Reason**: HTTP form/REST\
+  \ endpoints accept user input for SQL injection\n- **Implementation**: `/api/search`\
+  \ endpoint with vulnerable SQL query parameters\n\nCVE-2017-5638 (Struts OGNL):\n\
+  - **Choose**: Apache Struts application with action endpoints\n- **Reason**: HTTP\
+  \ requests to Struts actions trigger OGNL injection\n- **Implementation**: Struts\
+  \ action accepting HTTP parameters for OGNL evaluation\n\nGenerate working code\
+  \ that demonstrates the vulnerability effectively through HTTP endpoints accessible\
+  \ on port 8080\n"
+examples: []

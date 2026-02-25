@@ -1,0 +1,436 @@
+metadata:
+  name: 'code_adaptation'
+  version: '2.0.0'
+  description: 'Adapt code for specific framework'
+  category: 'framework'
+  author: 'FORGE Framework'
+  last_updated: '2025-11-03'
+  extends: base_code_adaptation
+  tags:
+  - framework
+  - adaptation
+
+placeholders:
+  required:
+  - adaptation_strategy
+  - framework_requirements
+  - github_context
+  - original_code
+  - package_name
+  - package_version
+  - source_framework
+  - target_framework
+  - version_guidance
+  - vulnerability_type
+  optional: []
+
+template: |
+  {% extends 'base_code_adaptation.yaml' %}
+
+  {% block adaptation_strategy %}
+  ## Adaptation Strategy: {{ adaptation_strategy }}
+
+  ### Code Transformation Rules:
+  1. **Preserve Vulnerability Logic**: The core vulnerability demonstration MUST remain identical
+  2. **Framework Integration**: Adapt code to use target framework patterns and conventions
+  3. **CRITICAL - Dependency Analysis**: Analyze ALL imports in the original code and add corresponding dependencies
+  4. **Configuration**: Add framework-specific configuration as needed
+  5. **Entry Points**: Create appropriate entry points (main class, web endpoints, etc.)
+
+  ## MANDATORY DEPENDENCY ANALYSIS - CRITICAL FOR BUILD SUCCESS
+  
+  **BUILD FAILURE WARNING**: If you miss required dependencies, the container build will FAIL with compilation errors.
+  
+  **STEP 1**: Scan the original_code for ALL imports and determine required dependencies:
+  
+  **Spring Security Patterns (MOST COMMON FAILURE)**:
+  - If code contains `import org.springframework.security.*` → ADD spring-boot-starter-security  
+  - If code contains `@EnableWebSecurity` → ADD spring-boot-starter-security
+  - If code contains `SecurityFilterChain` → ADD spring-boot-starter-security
+  - If code contains `HttpSecurity` → ADD spring-boot-starter-security
+  - If code contains `WebSecurityConfigurerAdapter` → ADD spring-boot-starter-security
+  - If code contains `AuthenticationManager` → ADD spring-boot-starter-security
+  
+  **Other Framework Patterns**:
+  - If code contains `import org.springframework.boot.actuator.*` → ADD spring-boot-starter-actuator
+  - If code contains `import javax.websocket.*` OR `@ServerEndpoint` → ADD spring-boot-starter-websocket
+  - If code contains `import com.fasterxml.jackson.*` AND not Spring Boot → ADD jackson-databind
+  - If code contains `@Action` OR `@Result` (Struts 2.1+) → ADD struts2-convention-plugin
+  
+  **CRITICAL EXAMPLES FROM REAL CVEs**:
+  
+  **CVE-2024-22233 (Spring Security DoS)**:
+  ```java
+  @Configuration
+  @EnableWebSecurity  // ← This requires spring-boot-starter-security
+  public class SecurityConfig {
+      @Bean
+      public SecurityFilterChain filterChain(HttpSecurity http) { // ← This too
+  ```
+  **REQUIRED DEPENDENCY**: 
+  ```json
+  {"group_id": "org.springframework.boot", "artifact_id": "spring-boot-starter-security"}
+  ```
+  
+  **CVE with WebSocket**:
+  ```java
+  @ServerEndpoint("/websocket")  // ← This requires spring-boot-starter-websocket
+  public class WebSocketEndpoint {
+  ```
+  **REQUIRED DEPENDENCY**:
+  ```json
+  {"group_id": "org.springframework.boot", "artifact_id": "spring-boot-starter-websocket"}
+  ```
+  
+  **STEP 2**: For each import/annotation pattern, add the corresponding dependency to dependencies_added
+  
+  **STEP 3**: DOUBLE-CHECK your dependencies_added array - it must NOT be empty if you found patterns above
+
+  ### Adaptation Strategies:
+
+  #### WRAP_STANDALONE
+  - Wrap existing vulnerability code in framework structure
+  - Add framework boilerplate around core vulnerability logic
+  - Maintain original vulnerability demonstration method
+
+  #### CONVERT_TO_WEB
+  - Convert console/standalone code to web application
+  - Create REST endpoints or web pages that trigger vulnerability
+  - Add HTTP request/response handling
+
+  #### CONVERT_FRAMEWORK
+  - Migrate from one framework to another
+  - Replace framework-specific annotations and patterns
+  - Update dependency injection and configuration approaches
+
+  #### ENHANCE_NATIVE
+  - Use target framework's native features to enhance demonstration
+  - Leverage framework-specific security features (or lack thereof)
+  - Show framework-specific vulnerability manifestations
+
+  #### MICROSERVICE_PATTERN
+  - Adapt code for microservice architecture
+  - Add service discovery, configuration management
+  - Create realistic microservice vulnerability scenarios
+
+  #### PROTOCOL_SERVER (Protocol-Level Vulnerabilities)
+  - Implement protocol server instead of HTTP REST endpoints
+  - Use Undertow/Netty server with protocol handlers
+  - Configure protocol-specific options (HTTP/2, remoting, WebSocket)
+  - The vulnerable code path must be in protocol handling, not application logic
+
+  #### FRAMEWORK_INTERNAL_DOC (Framework-Internal Vulnerabilities)
+  - Create minimal application that triggers framework processing
+  - Add comprehensive documentation explaining framework limitation
+  - Focus on educational value about framework architecture
+  - Validate framework version and component execution, not user code
+  {% endblock %}
+
+  {% block framework_specific_rules %}
+  ## CRITICAL: Version-Specific Framework Constraints
+
+  **Target Package Version**: {{ package_version }}
+
+  You MUST generate code compatible with this SPECIFIC version. Framework features vary by version!
+
+  ### Apache Struts Version Requirements:
+
+  **Struts 2.0.x (2006-2008) - XML Configuration ONLY**:
+  - ❌ NO @Action, @Result, @Namespace annotations (didn't exist yet!)
+  - ❌ NO struts2-convention-plugin (not available for 2.0.x)
+  - ✅ Use ActionSupport class with execute() method
+  - ✅ Configuration ONLY via struts.xml (templates will inject this)
+  - ✅ Plain JavaBean properties with getters/setters
+  - Example version check: if {{ package_version }} starts with "2.0", use XML-only approach
+
+  **Struts 2.1.x - 2.4.x (2009-2014) - Annotations Supported**:
+  - ✅ Can use @Action, @Result, @Namespace annotations
+  - ✅ Requires struts2-convention-plugin dependency
+  - ✅ Both XML and annotation config supported
+
+  **Struts 2.5.x+ (2015+) - Modern Struts**:
+  - ✅ Full annotation support
+  - ⚠️  Package changes: org.apache.struts2.dispatcher.filter (not ng.filter)
+  - ✅ Requires struts2-convention-plugin
+
+  **IMPORTANT**: If target version is 2.0.x:
+  1. Generate PLAIN ActionSupport class with NO annotations
+  2. DO NOT add struts2-convention-plugin to dependencies_added
+  3. struts.xml will be injected by templates - focus only on Action class code
+
+  ## Framework-Specific Adaptation Notes
+
+  **IMPORTANT - Struts-Specific Rules**:
+  - **DO NOT create VulnApplication.java** - Struts uses WAR deployment, not standalone JAR with main()
+  - **DO NOT create struts.xml** - Template system injects this automatically
+  - **DO NOT create web.xml** - Template system injects this automatically
+  - **ONLY create Action classes** - These are the Java source files you need
+
+  **Key Differences Between Frameworks**:
+  - **Spring Boot**: Uses @RestController, @RequestBody, returns response objects, has main() method
+  - **Struts**: Extends ActionSupport, uses JavaBean setters/getters, returns String constants (SUCCESS/ERROR), no main() method
+  - **JAX-RS**: Uses @Path, @Produces/@Consumes, returns Response objects
+
+  ## CRITICAL: When Target Framework is SPRING_BOOT
+
+  If {{ target_framework }} is SPRING_BOOT, you MUST:
+
+  1. **NEVER generate ActionSupport classes** - These are Struts-specific
+  2. **ALWAYS generate @SpringBootApplication main class** with main() method
+  3. **ALWAYS generate @RestController classes** for HTTP endpoints
+  4. **Use Spring Boot patterns**: @PostMapping, @RequestBody, ResponseEntity
+  5. **Replace any ActionSupport.execute() with @PostMapping methods**
+  6. **Replace SUCCESS/ERROR constants with proper HTTP responses**
+  7. **Add spring-boot-starter-web dependency if needed**
+
+  Example Spring Boot conversion:
+
+  FROM Struts:
+  ```java
+  public class VulnerableAction extends ActionSupport {
+      public String execute() { return SUCCESS; }
+  }
+  ```
+
+  TO Spring Boot:
+  ```java
+  @RestController
+  public class VulnerableController {
+      @PostMapping("/api/vulnerable")
+      public ResponseEntity<String> handleRequest() { return ResponseEntity.ok("success"); }
+  }
+
+  // Plus main class:
+  @SpringBootApplication
+  public class VulnApplication {
+      public static void main(String[] args) { SpringApplication.run(VulnApplication.class, args); }
+  }
+  ```
+  {% endblock %}
+
+  {% block output_requirements %}
+  ## Required Output Format
+
+  **CRITICAL: Provide your response in this EXACT format - endpoint metadata, code blocks, then JSON:**
+
+  **Step 1: Provide endpoint metadata as JSON:**
+
+  ```json
+  {
+    "endpoints": [
+      {"path": "/vuln/vulnerable.action", "method": "POST", "consumes": "multipart/form-data"},
+      {"path": "/", "method": "GET", "consumes": "application/json"}
+    ]
+  }
+  ```
+
+  This metadata helps the exploit generation system understand the exact endpoint paths, HTTP methods, and content types without parsing Java code.
+
+  **Step 2: Provide all Java files as markdown code blocks:**
+
+  ````
+  ```file:src/main/java/com/vuln/ClassName.java
+  [Complete Java code here]
+  ```
+
+  ```file:src/main/java/com/vuln/AnotherClass.java
+  [Complete Java code here]
+  ```
+  ````
+
+  **Step 3: Provide adaptation metadata as JSON:**
+
+  CRITICAL INSTRUCTIONS FOR "dependencies_added" FIELD:
+  1. Specify ONLY group_id and artifact_id for each dependency
+  2. DO NOT include a "version" field - versions will be automatically resolved from Maven Central
+  3. The system will automatically select the best compatible version based on the vulnerable package version
+  4. This ensures all dependencies actually exist in Maven Central and are compatible
+
+  **CRITICAL EXAMPLES - MATCH THESE PATTERNS EXACTLY**:
+  
+  **PATTERN 1: Spring Security (CVE-2024-22233 type)**:
+  Original code contains: `@EnableWebSecurity`, `SecurityFilterChain`, `HttpSecurity`
+  ```json
+  "dependencies_added": [
+    {
+      "group_id": "org.springframework.boot",
+      "artifact_id": "spring-boot-starter-security"
+    }
+  ]
+  ```
+  
+  **PATTERN 2: Struts Convention Plugin**:
+  Original code contains: `@Action`, `@Result`, `@Namespace` 
+  ```json
+  "dependencies_added": [
+    {
+      "group_id": "org.apache.struts",
+      "artifact_id": "struts2-convention-plugin"
+    }
+  ]
+  ```
+  
+  **PATTERN 3: WebSocket Support**:
+  Original code contains: `@ServerEndpoint`, `javax.websocket.*`, `WebSocketHandler`
+  ```json
+  "dependencies_added": [
+    {
+      "group_id": "org.springframework.boot",
+      "artifact_id": "spring-boot-starter-websocket"  
+    }
+  ]
+  ```
+  
+  **PATTERN 4: Spring Boot Actuator**:
+  Original code contains: `@Endpoint`, `HealthIndicator`, `actuator.*`
+  ```json
+  "dependencies_added": [
+    {
+      "group_id": "org.springframework.boot",
+      "artifact_id": "spring-boot-starter-actuator"
+    }
+  ]
+  ```
+
+  CRITICAL INSTRUCTIONS FOR "adapted_code" FIELD - JAVA CODE ONLY:
+
+  1. **ONLY GENERATE JAVA SOURCE FILES** (.java files)
+     - Focus exclusively on the vulnerability demonstration logic
+     - Include all necessary Java classes with complete implementation
+     - DO NOT generate configuration files (web.xml, struts.xml, application.properties, application.yml, etc.)
+     - DO NOT generate view files (JSPs, HTML, Thymeleaf templates, etc.)
+     - Configuration and view files are automatically provided by the framework templates
+
+  2. **File Format**:
+     - Use code blocks with file: prefix for each Java file
+     - Format: ```file:src/main/java/com/vuln/ClassName.java
+     - Follow with complete, compilable Java code
+     - Include all package declarations, imports, annotations, class definitions, and methods
+     - NO PLACEHOLDERS - provide complete implementation
+     - Close each code block with ```
+
+  3. **Code Quality**:
+     - Provide COMPLETE implementation (no "... rest of code here" placeholders)
+     - Ensure code compiles and demonstrates the vulnerability
+     - Keep code concise but fully functional
+     - Include all necessary imports and proper error handling
+
+  Example format - ONLY Java files:
+  "```file:src/main/java/com/vuln/VulnApplication.java
+  package com.vuln;
+
+  import org.springframework.boot.SpringApplication;
+  import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+  @SpringBootApplication
+  public class VulnApplication {
+      public static void main(String[] args) {
+          SpringApplication.run(VulnApplication.class, args);
+      }
+  }
+  ```
+
+  ```file:src/main/java/com/vuln/VulnerableController.java
+  package com.vuln;
+
+  import org.springframework.web.bind.annotation.*;
+
+  @RestController
+  public class VulnerableController {
+      @PostMapping(\"/api/vulnerable\")
+      public String triggerVulnerability(@RequestBody String payload) {
+          // Complete vulnerability demonstration logic
+          return \"Processed: \" + payload;
+      }
+  }
+  ```"
+
+  ```json
+  {
+    "changes_made": [
+      "List of specific changes made during adaptation",
+      "Such as: Added @RestController annotation, Created web endpoint, Updated imports"
+    ],
+    "dependencies_added": [
+      {
+        "group_id": "org.springframework.boot",
+        "artifact_id": "spring-boot-starter-web"
+      }
+    ],
+    "adaptation_notes": "Brief explanation of adaptation approach"
+  }
+  ```
+
+  **Example complete response:**
+
+  ````
+  ```file:src/main/java/com/vuln/VulnerableAction.java
+  package com.vuln;
+
+  import com.opensymphony.xwork2.ActionSupport;
+
+  public class VulnerableAction extends ActionSupport {
+      private String payload;
+
+      public String execute() throws Exception {
+          // Vulnerability logic here
+          return SUCCESS;
+      }
+
+      public void setPayload(String payload) { this.payload = payload; }
+      public String getPayload() { return payload; }
+  }
+  ```
+
+  ```json
+  {
+    "changes_made": ["Converted Spring @RestController to Struts ActionSupport", "Removed Spring Boot main class"],
+    "dependencies_added": [],
+    "adaptation_notes": "Adapted Spring Boot REST API to Struts 2.0.x Action class with XML configuration"
+  }
+  ```
+  ````
+  {% endblock %}
+
+  {% block dependency_management %}
+  ## Dependency Management Principles
+
+  CRITICAL - Understanding When to Add Dependencies:
+
+  **ONLY add dependencies for OPTIONAL framework extensions/plugins that are NOT included in the base framework package.**
+
+  Framework packages (struts2-core, spring-boot-starter-web, etc.) include their core functionality and common libraries as transitive dependencies. Do NOT add these transitives explicitly - they're already present!
+
+  **Good Examples (NEED explicit dependency - optional extensions):**
+  - Struts @Action annotations (2.1+) → struts2-convention-plugin (optional plugin, not in struts2-core)
+  - Spring Security features → spring-boot-starter-security (optional module)
+  - JAX-RS annotations → jaxrs-api or jersey-server (separate API specification)
+
+  **Bad Examples (DO NOT add - already included transitively):**
+  - Struts file upload functionality → Already in struts2-core (transitive: commons-fileupload)
+    CRITICAL: Do NOT add commons-fileupload explicitly! Struts includes the correct version automatically.
+    Adding it explicitly causes version conflicts and runtime errors (NoSuchFieldError, NoSuchMethodError)
+  - Spring REST endpoints (@RestController, @RequestMapping) → Already in spring-boot-starter-web
+  - Spring JSON handling → Already in spring-boot-starter-web (transitive: jackson-databind)
+  - Jackson in Spring projects → Already in spring-boot-starter-web
+  - Logging APIs (slf4j-api) → Already in framework starters
+
+  **Guiding Principle**: If the feature is CORE to the framework (file handling, REST endpoints, JSON parsing), it's already included. Only add dependencies for OPTIONAL plugins/extensions.
+
+  **When in doubt, don't add it** - Maven build will fail with clear "package does not exist" error if the dependency is truly needed. This is MUCH better than adding it incorrectly and causing version conflicts.
+
+  **Format (never include version field - system auto-resolves):**
+  "dependencies_added": [
+    {
+      "group_id": "org.apache.struts",
+      "artifact_id": "struts2-convention-plugin"
+      // No version field - system automatically resolves compatible version
+    }
+  ]
+
+  **Common mistake to avoid**: Don't add libraries just because your code imports them - check if they're already transitive dependencies of the main package.
+
+  **If you include an unnecessary dependency, it may override the framework's transitive dependency with an incompatible version, causing runtime crashes!**
+  {% endblock %}
+
+examples: []

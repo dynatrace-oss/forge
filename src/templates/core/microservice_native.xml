@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Core template for cloud-native microservice applications -->
+    <!-- Designed for Micronaut, Quarkus, and modern reactive applications -->
+
+    <!-- Use org.cve-emulator groupId to avoid conflict with vulnerable package -->
+    <groupId>org.cve-emulator</groupId>
+    <artifactId>{{ artifact_id }}-microservice-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Vulnerability Demo - {{ package_name }} (Microservice)</name>
+    <description>Cloud-native microservice demonstrating vulnerability in {{ package_name }} {{ package_version }}</description>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.version>3.11.0</maven.compiler.version>
+        <maven.surefire.version>3.0.0</maven.surefire.version>
+        <maven.failsafe.version>3.0.0</maven.failsafe.version>
+        
+        <!-- Framework versions - will be customized based on selection -->
+        <micronaut.version>3.10.2</micronaut.version>
+        <quarkus.version>3.3.2</quarkus.version>
+        <graalvm.version>22.3.3</graalvm.version>
+        
+        <!-- Build and runtime properties -->
+        <exec.mainClass>{{ main_class }}</exec.mainClass>
+        <native.maven.plugin.version>0.9.23</native.maven.plugin.version>
+    </properties>
+
+    <!-- Repositories section for package-specific repositories -->
+    {{ repositories }}
+
+    <dependencies>
+        <!-- Core microservice dependencies (framework-specific) -->
+        <!-- These will be dynamically selected based on framework choice -->
+        
+        <!-- Main vulnerability package dependency -->
+        <!-- Will be dynamically customized based on package requirements -->
+        {{ dependencies }}
+
+        <!-- Common microservice dependencies -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.95.Final</version>
+        </dependency>
+
+        <!-- Reactive streams -->
+        <dependency>
+            <groupId>org.reactivestreams</groupId>
+            <artifactId>reactive-streams</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+
+        <!-- JSON processing -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+
+        <!-- Logging dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+
+        <!-- Metrics and monitoring -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>1.11.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>1.11.3</version>
+        </dependency>
+
+        <!-- Configuration -->
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.4.2</version>
+        </dependency>
+
+        <!-- Testing dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.19.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.3.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>{{ artifact_id }}-${project.version}</finalName>
+        
+        <plugins>
+            <!-- Compiler plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <!-- Framework-specific annotation processors will be added dynamically -->
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire plugin for unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- Failsafe plugin for integration tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven.failsafe.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Exec plugin for running application -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>${exec.mainClass}</mainClass>
+                    <systemProperties>
+                        <systemProperty>
+                            <key>server.port</key>
+                            <value>8080</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>micronaut.environments</key>
+                            <value>dev</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+
+            <!-- JAR plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>${exec.mainClass}</mainClass>
+                        </manifest>
+                        <manifestEntries>
+                            <Built-By>FORGE Framework</Built-By>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Vulnerability-Package>{{ package_name }}</Vulnerability-Package>
+                            <Vulnerability-Version>{{ package_version }}</Vulnerability-Version>
+                            <Framework-Type>Microservice Native</Framework-Type>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Assembly plugin for fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>${exec.mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Native image plugin for GraalVM native compilation -->
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native.maven.plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <imageName>${project.artifactId}</imageName>
+                    <mainClass>${exec.mainClass}</mainClass>
+                    <buildArgs>
+                        <buildArg>--no-fallback</buildArg>
+                        <buildArg>--allow-incomplete-classpath</buildArg>
+                        <buildArg>--report-unsupported-elements-at-runtime</buildArg>
+                        <buildArg>--install-exit-handlers</buildArg>
+                    </buildArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-native</id>
+                        <goals>
+                            <goal>compile-no-fork</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Dependency plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Profiles for different deployment scenarios -->
+    <profiles>
+        <!-- Micronaut profile -->
+        <profile>
+            <id>micronaut</id>
+            <properties>
+                <micronaut.version>3.10.2</micronaut.version>
+                <exec.mainClass>Application</exec.mainClass>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>io.micronaut</groupId>
+                    <artifactId>micronaut-inject</artifactId>
+                    <version>${micronaut.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.micronaut</groupId>
+                    <artifactId>micronaut-http-server-netty</artifactId>
+                    <version>${micronaut.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.micronaut</groupId>
+                    <artifactId>micronaut-jackson-databind</artifactId>
+                    <version>${micronaut.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.micronaut.build</groupId>
+                        <artifactId>micronaut-maven-plugin</artifactId>
+                        <version>4.0.0</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Quarkus profile -->
+        <profile>
+            <id>quarkus</id>
+            <properties>
+                <quarkus.version>3.3.2</quarkus.version>
+                <compiler-plugin.version>3.11.0</compiler-plugin.version>
+                <maven.compiler.release>11</maven.compiler.release>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+                <quarkus.package.type>uber-jar</quarkus.package.type>
+            </properties>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>io.quarkus.platform</groupId>
+                        <artifactId>quarkus-bom</artifactId>
+                        <version>${quarkus.version}</version>
+                        <type>pom</type>
+                        <scope>import</scope>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+            <dependencies>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-resteasy</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-resteasy-jackson</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-arc</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-smallrye-health</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.quarkus.platform</groupId>
+                        <artifactId>quarkus-maven-plugin</artifactId>
+                        <version>${quarkus.version}</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>build</goal>
+                                    <goal>generate-code</goal>
+                                    <goal>generate-code-tests</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Native profile for native image compilation -->
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <properties>
+                <skipITs>false</skipITs>
+                <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+
+        <!-- Development profile -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <maven.compiler.debug>true</maven.compiler.debug>
+                <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
+            </properties>
+        </profile>
+
+        <!-- Production profile -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <maven.compiler.debug>false</maven.compiler.debug>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+
+        <!-- Container profile for cloud deployment -->
+        <profile>
+            <id>container</id>
+            <properties>
+                <quarkus.container-image.build>true</quarkus.container-image.build>
+                <quarkus.container-image.registry>docker.io</quarkus.container-image.registry>
+                <quarkus.container-image.group>gyros</quarkus.container-image.group>
+                <quarkus.container-image.name>${project.artifactId}</quarkus.container-image.name>
+                <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
+            </properties>
+        </profile>
+    </profiles>
+</project>

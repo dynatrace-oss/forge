@@ -1,0 +1,302 @@
+metadata:
+  name: llm_poc_generation
+  version: 2.0.0
+  description: Generate proof-of-concept exploit code
+  category: exploit_generation
+  author: FORGE Framework
+  last_updated: '2025-11-03'
+  extends: base_exploit_generation
+  tags:
+  - exploit_generation
+  - exploitation
+
+placeholders:
+  required:
+  - application_endpoints
+  - container_code_context
+  - cve_id
+  - description
+  - github_context
+  - package_name
+  - name: poc_endpoints
+    type: list
+  - references_context
+  - vulnerability_type
+  - vulnerable_patterns
+  optional:
+  - endpoint_compliance_override
+  - name: severity
+    type: string
+    default: ""
+
+template: |
+  {% extends 'base_exploit_generation.yaml' %}
+
+  {% block vulnerability_analysis %}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CRITICAL: ENDPOINT METADATA - YOU MUST USE THESE EXACT VALUES
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  POC ENDPOINTS (If Available from PoC Analysis):
+  {% if poc_endpoints %}
+  {% for endpoint in poc_endpoints %}
+  - {{ endpoint }}
+  {% endfor %}
+  {% else %}
+  None available
+  {% endif %}
+
+  {{ endpoint_compliance_override }}
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BLUEPRINT-FIRST ANALYSIS APPROACH
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  YOU MUST ANALYZE IN THIS ORDER:
+
+  STEP 1: Understand what the blueprint application ACTUALLY implements (below)
+  STEP 2: Understand WHY that implementation is vulnerable (GitHub context)
+  STEP 3: Design exploit that matches the ENDPOINT METADATA above and works with STEP 1's actual interface
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CRITICAL INSTRUCTIONS FOR ENDPOINT COMPLIANCE:
+  1. The APPLICATION ENDPOINTS section above contains REQUIRED metadata extracted from the Java code
+  2. Each endpoint specifies:
+     - "path": The exact URL path you MUST use
+     - "method": The exact HTTP method (GET, POST, etc.) you MUST use
+     - "consumes": The REQUIRED Content-Type header (if specified)
+     - "parameter_types": The parameter annotations that determine request format
+
+  3. YOU MUST USE THESE EXACT VALUES - DO NOT GUESS OR USE GENERIC DEFAULTS
+
+  4. If "consumes" field exists and is not null:
+     → Set Content-Type header to EXACTLY that value
+     → Example: "consumes": "application/octet-stream" → headers = {"Content-Type": "application/octet-stream"}
+
+  5. If "consumes" is null, infer Content-Type from parameter_types:
+     → "annotation": "RequestBody", "type": "byte[]" → Content-Type: application/octet-stream
+     → "annotation": "RequestBody", "type": "String" → Content-Type: text/plain or application/json
+     → "annotation": "RequestBody", "type": "<Object>" → Content-Type: application/json
+     → "annotation": "RequestParam" → NO request body, parameters in URL query string
+
+  6. Common failure modes to AVOID:
+     Using "application/json" when endpoint requires "application/octet-stream"
+     Using POST when endpoint requires GET (or vice versa)
+     Sending request body for @RequestParam (should be URL query parameter)
+     Using wrong parameter format (e.g., JSON when endpoint expects binary data)
+
+  7. Validation: Before generating code, verify:
+     ✓ My HTTP method matches the "method" field
+     ✓ My Content-Type matches the "consumes" field (or inferred from parameter_types)
+     ✓ My request format matches the "parameter_types" annotations
+     ✓ I'm sending data in the correct location (URL params vs request body)
+
+  REAL-WORLD FAILURE EXAMPLES (LEARN FROM THESE):
+
+  Example 1: WRONG
+  Endpoint metadata: {"path": "/vulnerable", "method": "POST", "consumes": "application/octet-stream"}
+  Your code: headers = {"Content-Type": "application/json"}  # WRONG! Will get HTTP 415 error
+  Correct:   headers = {"Content-Type": "application/octet-stream"}
+
+  Example 2: WRONG
+  Endpoint metadata: {"path": "/vulnerable", "method": "POST", "parameter_types": [{"annotation": "RequestParam"}]}
+  Your code: data = json.dumps(payload).encode()  # WRONG! RequestParam goes in URL, not body
+  Correct:   url = base_url + "/vulnerable?param=" + urllib.parse.quote(value)
+
+  Example 3: CORRECT ✓
+  Endpoint metadata: {"path": "/api/test", "method": "GET", "consumes": null}
+  Your code: req = urllib.request.Request(url, method="GET")  # Correct! No body for GET
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  VULNERABILITY REFERENCES:
+  {{ references_context }}
+
+  NOTE: The GitHub context above explains WHY the vulnerability exists and the original CVE details.
+  However, your exploit MUST target the blueprint's ACTUAL implementation shown in APPLICATION CONTEXT above.
+  The blueprint may demonstrate the vulnerability differently than the original CVE attack vector.
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  VULNERABLE PATTERNS IN APPLICATION:
+  {{ vulnerable_patterns }}
+
+  TARGET ENVIRONMENT:
+  - Web application in Docker container
+  - Package: {{ package_name }}
+  - Available on port 8080
+  - Framework: Java/Spring Boot (typical but might be different)
+  {% endblock %}
+
+  {% block payload_construction %}
+  ## PAYLOAD CONSTRUCTION GUIDELINES:
+  - For JSON-based vulnerabilities: Use "application/json" Content-Type
+  - For YAML-based vulnerabilities: Use "text/plain" or "application/x-yaml" Content-Type
+  - For XML-based vulnerabilities: Use "application/xml" or "text/xml" Content-Type
+  - For deserialization vulnerabilities: Construct payloads that trigger object instantiation
+  - For injection vulnerabilities: Create payloads with appropriate injection vectors
+  - For file upload vulnerabilities: Use form data with the correct parameter names
+  - For path traversal: Use "../" sequences in file paths
+  - CRITICAL: Avoid Python recursion errors - keep nested structures under 100 levels maximum
+  - CRITICAL: Understand the vulnerability MECHANISM from GitHub context and references - don't guess
+  - CRITICAL: For JDK serialization vulnerabilities, don't create deeply nested JSON - use actual serialization exploits
+  - Read GitHub issue discussions and commit messages to understand the exact triggering mechanism
+  - If GitHub commit shows a fix, reverse engineer it to understand what was vulnerable
+
+  ## CRITICAL FOR HTTP HEADER-BASED VULNERABILITIES:
+  - For vulnerabilities like HTTP Response Splitting, Header Injection, Reflected File Download (RFD):
+    * Vulnerability manifests in HTTP RESPONSE HEADERS, NOT the response body
+    * You MUST access and log response.headers for validation analysis
+    * Store the full response object to access both body AND headers
+    * Explicitly log relevant headers: Content-Disposition, Set-Cookie, Location, etc.
+
+  - Example logging for RFD/Content-Disposition vulnerabilities:
+    ```python
+    response = urllib.request.urlopen(req)
+    content_disp = response.headers.get('Content-Disposition', 'Not set')
+    self.logger.info(f"Content-Disposition header: {content_disp}")
+    self.logger.info(f"Response body: {response.read().decode()}")
+    ```
+
+  - Example logging for CRLF injection:
+    ```python
+    response = urllib.request.urlopen(req)
+    self.logger.info(f"HTTP Status: {response.status}")
+    for header, value in response.headers.items():
+        self.logger.info(f"{header}: {value}")
+    ```
+  {% endblock %}
+
+  {% block language_specific %}
+  ## Python-Specific Requirements:
+
+  SECURITY RESEARCH REQUIREMENTS:
+  1. Create a standalone Python exploit script for vulnerability analysis in controlled environments
+  2. Use urllib (built-in library) for HTTP communication - DO NOT use requests library
+  3. READ THE JAVA CONTROLLER CODE ABOVE to identify the vulnerable endpoint path and method
+  4. READ THE METHOD SIGNATURE to understand the expected parameter format (@RequestParam, @RequestBody, etc.)
+  5. EXTRACT the correct Content-Type based on the parameter annotations
+  6. Include proper error handling and timeouts for safe testing
+  7. Generate payloads that reproduce the specific vulnerability mechanism from the CVE
+  8. Add clear logging for analysis purposes - log HTTP status, relevant headers, and response body
+  9. Safe for use in isolated test environment only - authorized security testing
+  10. CRITICAL: Only use standard Python libraries (urllib, json, sys, logging) - no external dependencies
+  11. CRITICAL: If vulnerability description contains a proof of concept code pattern, use that EXACT pattern - do not create your own variation.
+  12. CRITICAL: When translating PoC code from Java/other languages to Python, ensure the generated payload string matches exactly what the original code would produce
+
+  CRITICAL OUTPUT FORMAT:
+  - Return ONLY executable Python code
+  - NO markdown formatting, NO code block markers, NO explanations
+  - Start with #!/usr/bin/env python3
+  - End with valid Python code only
+  - DO NOT include any text before or after the Python code
+
+  ## CONTENT-TYPE DETERMINATION (CRITICAL):
+
+  **Method 1: Explicit "consumes" Field (Highest Priority)**
+  If endpoint metadata has non-null "consumes" field:
+  ```python
+  headers = {"Content-Type": <exact value from consumes field>}
+  ```
+
+  **Method 2: Infer from Parameter Annotations (When "consumes" is null)**
+
+  For @RequestBody with primitive types:
+  - byte[] → application/octet-stream
+  - String (no explicit CT in endpoint) → text/plain or application/json based on content
+  - MultipartFile → multipart/form-data
+
+  For @RequestBody with Object types:
+  - JSON objects/POJOs → application/json
+  - XML types → application/xml
+
+  For @RequestParam:
+  - NO request body
+  - Parameters in URL query string: ?param1=value1&param2=value2
+
+  **Method 3: Fallback to Default (Only if Methods 1 & 2 don't apply)**
+  - application/json (most Spring Boot endpoints)
+
+  ## REQUEST BODY FORMAT DETERMINATION:
+
+  **For @RequestParam (parameters in URL)**:
+  ```python
+  # NO request body - append to URL
+  params = urllib.parse.urlencode({"param1": "value1", "param2": "value2"})
+  url = f"{base_url}/vulnerable?{params}"
+  req = urllib.request.Request(url, method="GET")  # or POST, but no data
+  ```
+
+  **For @RequestBody with byte[]**:
+  ```python
+  data = payload_bytes  # raw bytes, no JSON encoding
+  headers = {"Content-Type": "application/octet-stream"}
+  req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+  ```
+
+  **For @RequestBody with String**:
+  ```python
+  data = payload_string.encode('utf-8')  # encode to bytes
+  headers = {"Content-Type": "text/plain"}  # or application/json if JSON string
+  req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+  ```
+
+  **For @RequestBody with Object (POJO)**:
+  ```python
+  import json
+  data = json.dumps(payload_dict).encode('utf-8')
+  headers = {"Content-Type": "application/json"}
+  req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+  ```
+
+  **For MultipartFile**:
+  ```python
+  boundary = '----WebKitFormBoundary' + ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+  body = (
+      f'--{boundary}\r\n'
+      f'Content-Disposition: form-data; name="file"; filename="test.txt"\r\n'
+      f'Content-Type: text/plain\r\n\r\n'
+      f'{file_content}\r\n'
+      f'--{boundary}--\r\n'
+  ).encode('utf-8')
+  headers = {"Content-Type": f"multipart/form-data; boundary={boundary}"}
+  req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+  ```
+
+  ## COMMON MISTAKES TO AVOID:
+
+  1. **Wrong Content-Type for byte[] endpoints**:
+     WRONG: `headers = {"Content-Type": "application/json"}`
+     RIGHT: `headers = {"Content-Type": "application/octet-stream"}`
+
+  2. **Sending JSON when endpoint expects raw bytes**:
+     WRONG: `data = json.dumps(payload).encode()`
+     RIGHT: `data = payload_bytes  # already bytes, don't JSON encode`
+
+  3. **Sending request body for @RequestParam**:
+     WRONG: `req = urllib.request.Request(url, data=data)`
+     RIGHT: `url = f"{url}?param={value}"` (no data parameter)
+
+  4. **Not using exact path from metadata**:
+     WRONG: `url = base_url + "/api/vulnerable"`  (guessing)
+     RIGHT: `url = base_url + "/vuln/test.action"`  (from endpoint metadata)
+
+  5. **Ignoring HTTP method from metadata**:
+     WRONG: Always using POST
+     RIGHT: Using method="GET" or method="POST" as specified in metadata
+
+  ## SUCCESS CHECKLIST (Verify Before Generating Code):
+  ✓ I read the APPLICATION ENDPOINTS metadata section
+  ✓ I extracted the EXACT path value
+  ✓ I extracted the EXACT method value
+  ✓ I determined Content-Type using the decision tree above
+  ✓ I matched request format to parameter annotations
+  ✓ I'm not sending a body for @RequestParam endpoints
+  ✓ I'm not using application/json for byte[] endpoints
+  ✓ I'm using urllib, not requests library
+  ✓ I'm logging response headers for header-based vulnerabilities
+  ✓ My code outputs ONLY Python (no markdown, no explanations)
+  {% endblock %}
+
+examples: []

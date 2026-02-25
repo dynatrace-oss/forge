@@ -1,0 +1,48 @@
+# Shamlessly copied from Team Artemis
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+repos:
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.20.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies:
+          [
+            "@commitlint/config-conventional",
+            "commitlint-plugin-function-rules@v4.0.0",
+          ]
+  - repo: https://github.com/rbubley/mirrors-prettier # using fork due to https://github.com/prettier/prettier/issues/15742#issuecomment-2136884297
+    rev: v3.4.2
+    hooks:
+      - id: prettier
+        stages: [pre-commit]
+        name: "Format files with Prettier"
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: ruff
+        types_or: [python, pyi]
+        name: "Lint files with ruff"
+        args: [--fix]
+      - id: ruff-format
+        types_or: [python, pyi]
+        name: "Format files with ruff"
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-xml
+      - id: check-yaml
+        args: [--allow-multiple-documents, --unsafe]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]

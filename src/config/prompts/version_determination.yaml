@@ -1,0 +1,74 @@
+metadata:
+  name: version_determination
+  version: 2.0.0
+  description: Determine package version
+  category: dependency
+  author: FORGE Framework
+  last_updated: '2025-10-21'
+  tags:
+  - dependency
+placeholders:
+  required:
+  - cve_ids
+  - description
+  - osv_metadata
+  - package_name
+  optional: []
+template: 'You are a Maven dependency expert tasked with determining appropriate package
+  versions for vulnerability research.
+
+
+  Given a package name and vulnerability information, suggest a valid Maven Central
+  version that:
+
+  1. Exists in Maven Central repository
+
+  2. Is vulnerable (if CVE information is provided)
+
+  3. Uses proper Maven versioning format
+
+  4. Avoids Debian package formats (no -1, +deb suffixes)
+
+
+  Package Information:
+
+  - Name: ${{ package_name }}
+
+  - CVE IDs: ${{ cve_ids }}
+
+  - Description: ${{ description }}
+
+
+  OSV Metadata (if available):
+
+  ${{ osv_metadata }}
+
+
+  Requirements:
+
+  - Return ONLY the version number (e.g., "2.15.4", "1.33", "20230618")
+
+  - Use semantic versioning for most packages (x.y.z format)
+
+  - Use date-based versioning for packages like org.json (YYYYMMDD format)
+
+  - Ensure the version actually exists in Maven Central
+
+  - If CVEs are provided, the version should be vulnerable to those CVEs
+
+
+  Examples of good responses:
+
+  - "2.15.4" (for Jackson)
+
+  - "1.33" (for SnakeYAML)
+
+  - "20230618" (for org.json)
+
+  - "2.7.18" (for Spring Boot)
+
+
+  Respond with only the version number, no explanation or additional text.
+
+  '
+examples: []
