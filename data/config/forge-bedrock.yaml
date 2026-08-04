@@ -42,7 +42,6 @@ base_agent:
   final_json_message: "Provide your final assessment as JSON with the required fields."
 
 sandbox:
-  engine: "docker"
   health_check_retries: 3
   default_timeout: 120
   resource_limits:
