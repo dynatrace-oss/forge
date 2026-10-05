@@ -601,10 +601,13 @@ async def _run_single(
         max_generation_attempts=cfg.agents.generator.max_generation_attempts,
     )
 
-    # Sandbox Manager (Podman)
-    from forge.sandbox.podman import PodmanSandboxManager
+    # Sandbox Manager (Podman or Docker, per config)
+    if cfg.sandbox.engine == "docker":
+        from forge.sandbox.docker import DockerSandboxManager as _SandboxManagerCls
+    else:
+        from forge.sandbox.podman import PodmanSandboxManager as _SandboxManagerCls
 
-    sandbox_manager = PodmanSandboxManager(
+    sandbox_manager = _SandboxManagerCls(
         memory=cfg.sandbox.resource_limits.memory,
         cpus=float(cfg.sandbox.resource_limits.cpus),
         timeout=cfg.sandbox.default_timeout,

@@ -37,16 +37,17 @@ from forge.sandbox.models import CommandResult, HttpResponse, SandboxSnapshot
 logger = logging.getLogger(__name__)
 
 
-async def run_podman(
+async def _run_container_cli(
+    binary: str,
     args: list[str],
-    timeout: int = 120,
+    timeout: int,
 ) -> CommandResult:
-    """Execute a podman CLI command.
+    """Execute a container-engine CLI command (``podman`` or ``docker``).
 
     Default timeout is 120s (increased from 60s to accommodate slow
-    ``pod rm`` operations on resource-constrained instances).
+    ``pod rm`` / ``rm`` operations on resource-constrained instances).
     """
-    cmd = ["podman", *args]
+    cmd = [binary, *args]
 
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -55,7 +56,7 @@ async def run_podman(
             stderr=asyncio.subprocess.PIPE,
         )
     except Exception as e:
-        logger.warning("Podman command failed to start: %s — %s", " ".join(cmd), e)
+        logger.warning("%s command failed to start: %s — %s", binary, " ".join(cmd), e)
         return CommandResult(exit_code=-1, stderr=str(e))
 
     try:
@@ -67,7 +68,7 @@ async def run_podman(
             stderr=stderr_bytes.decode(errors="replace"),
         )
     except TimeoutError:
-        logger.warning("Podman command timed out: %s", " ".join(cmd))
+        logger.warning("%s command timed out: %s", binary, " ".join(cmd))
         # Kill the leaked process to prevent accumulation over batch runs
         try:
             proc.kill()
@@ -78,8 +79,24 @@ async def run_podman(
             logger.debug("Failed to kill timed-out process", exc_info=True)
         return CommandResult(exit_code=-1, stderr="Command timed out", timed_out=True)
     except Exception as e:
-        logger.warning("Podman command failed: %s — %s", " ".join(cmd), e)
+        logger.warning("%s command failed: %s — %s", binary, " ".join(cmd), e)
         return CommandResult(exit_code=-1, stderr=str(e))
+
+
+async def run_podman(
+    args: list[str],
+    timeout: int = 120,
+) -> CommandResult:
+    """Execute a podman CLI command."""
+    return await _run_container_cli("podman", args, timeout)
+
+
+async def run_docker(
+    args: list[str],
+    timeout: int = 120,
+) -> CommandResult:
+    """Execute a docker CLI command."""
+    return await _run_container_cli("docker", args, timeout)
 
 
 async def do_http_request(
