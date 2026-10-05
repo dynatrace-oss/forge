@@ -54,14 +54,15 @@ The oracle evaluates every exploit tool call — never just the final state. It 
 git clone https://github.com/dynatrace-oss/forge.git
 cd forge
 uv sync
-cp .env.example .env   # set LLM credentials (see .env.example)
 ```
 
-For AWS Bedrock:
+LLM credentials are read from the process environment. For AWS Bedrock:
 ```bash
 export AWS_BEARER_TOKEN_BEDROCK="<your-key>"
 export AWS_REGION_NAME="us-east-1"
 ```
+
+FORGE does not load `.env` itself. litellm does at import, from the directory it is installed in and above (so a `.env` in the clone root works with a venv created by `uv sync`), unless `LITELLM_MODE` is set to anything other than `DEV`. Variables already exported in your shell take precedence.
 
 ## Usage
 
