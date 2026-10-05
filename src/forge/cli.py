@@ -190,6 +190,9 @@ def _resolve_cve_sources(
 
     data_path = Path("data/CVE Genie Data.json")
 
+    if batch is None and not data_path.exists():
+        logger.warning("CVE-GENIE data not found at %s, continuing without GENIE intel", data_path)
+
     if cve_id is not None:
         cwes: list[str] = []
         language = ""
