@@ -86,8 +86,8 @@ Runtime configs in `data/config/`:
 | Config | Provider | Model |
 |--------|----------|-------|
 | `forge.yaml` | GitHub Copilot | Claude Sonnet 4.5 |
-| `forge-bedrock.yaml` | AWS Bedrock | Claude Sonnet 4.5 |
-| `forge-bedrock-fallback.yaml` | AWS Bedrock | Llama 4 Maverick |
+| `forge-bedrock.yaml` | AWS Bedrock | Claude Sonnet 4.6 (Llama 4 Maverick for intel and oracle critic) |
+| `forge-bedrock-fallback.yaml` | AWS Bedrock | Llama 4 Maverick (all agents; Bedrock does not accept `tool_choice` for it, so tool use is not forced) |
 
 Config controls per-agent model, turn limits, temperature, sandbox resource limits, budget cap ($2.50/CVE), oracle patterns, and model pricing.
 

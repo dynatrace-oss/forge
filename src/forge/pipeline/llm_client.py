@@ -243,7 +243,10 @@ class LLMClient:
             # providers (e.g. GitHub Copilot) return empty choices when
             # tools are present alongside tool_choice="none".
             kwargs["tools"] = tools
-            kwargs["tool_choice"] = tool_choice or "auto"
+            if _accepts_tool_choice(resolved):
+                kwargs["tool_choice"] = tool_choice or "auto"
+            else:
+                logger.debug("Omitting tool_choice: unsupported by %s", resolved)
         if metadata:
             kwargs["metadata"] = metadata
 
@@ -387,6 +390,13 @@ def export_and_clear_otel_spans() -> list[dict[str, Any]]:
     _otel_exporter.clear()
     logger.debug("Exported %d OTEL spans", len(exported))
     return exported
+
+
+def _accepts_tool_choice(model: str) -> bool:
+    """Bedrock rejects tool_choice for models litellm does not list it for (e.g. Llama 4)."""
+    if not model.startswith("bedrock/"):
+        return True
+    return "tool_choice" in (litellm.get_supported_openai_params(model=model) or [])
 
 
 def _is_reasoning_model(model: str) -> bool:
