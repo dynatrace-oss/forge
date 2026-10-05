@@ -79,6 +79,8 @@ forge run --cve-list data/test/validation_25.txt
 forge stats
 ```
 
+The CVE-GENIE dataset is read from `data/CVE Genie Data.json`, relative to the directory you run `forge` from. `--batch` and `forge select` require it. `forge run <CVE>` and `--cve-list` still run without it, with a warning, but without the GENIE patch and advisory data.
+
 ## Configuration
 
 Runtime configs in `data/config/`:

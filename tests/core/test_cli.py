@@ -133,6 +133,41 @@ def _make_mock_pipeline_result(cve_id: str) -> dict[str, Any]:
 class TestResolveCveSources:
     """Tests for _resolve_cve_sources CWE lookup."""
 
+    @pytest.mark.parametrize("mode", ["single", "list"])
+    def test_missing_dataset_warns_once_and_returns_empty_shell(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        mode: str,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "ids.txt").write_text("CVE-2099-0001\nCVE-2099-0002\n")
+
+        from forge.cli import _resolve_cve_sources
+
+        with caplog.at_level("WARNING"):
+            if mode == "single":
+                results = _resolve_cve_sources("CVE-2099-0001", None, None, seed=1)
+            else:
+                results = _resolve_cve_sources(None, None, "ids.txt", seed=1)
+
+        assert all(r["source_data"] == {} and r["cwes"] == [] for r in results)
+        warnings = [r for r in caplog.records if "CVE-GENIE data not found" in r.getMessage()]
+        assert len(warnings) == 1
+        assert "data/CVE Genie Data.json" in warnings[0].getMessage()
+
+    def test_batch_without_dataset_exits(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        from forge.cli import _resolve_cve_sources
+
+        with pytest.raises(SystemExit) as exc:
+            _resolve_cve_sources(None, 5, None, seed=1)
+        assert exc.value.code == 1
+
     def test_cve_list_mode_preserves_cwes(self, tmp_path: Path) -> None:
         """CVE IDs found in CVE-GENIE should have their CWE tags populated."""
         data_path = Path("data/CVE Genie Data.json")
