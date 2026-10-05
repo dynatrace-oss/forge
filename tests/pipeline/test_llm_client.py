@@ -77,6 +77,40 @@ class TestResolveModel:
         assert client._resolve_model("gpt-5-mini") == "github_copilot/gpt-5-mini"
 
 
+class TestToolChoiceGating:
+    TOOLS = [{"type": "function", "function": {"name": "exec_command", "parameters": {}}}]
+
+    @pytest.mark.parametrize(
+        ("model", "tool_choice", "expected"),
+        [
+            ("bedrock/us.meta.llama4-maverick-17b-instruct-v1:0", None, None),
+            ("bedrock/us.meta.llama4-maverick-17b-instruct-v1:0", "required", None),
+            ("bedrock/us.anthropic.claude-sonnet-4-6", "required", "required"),
+            ("bedrock/us.anthropic.claude-sonnet-4-6", None, "auto"),
+            ("github_copilot/claude-sonnet-4.5", None, "auto"),
+        ],
+    )
+    async def test_tool_choice_sent_only_when_supported(
+        self, model: str, tool_choice: str | None, expected: str | None
+    ) -> None:
+        client = LLMClient(model, enable_otel=False)
+        sent: dict[str, object] = {}
+
+        async def fake_call(**kwargs: object) -> object:
+            sent.update(kwargs)
+            raise RuntimeError("stop")
+
+        client._call_with_retry = fake_call  # type: ignore[method-assign]  # capture kwargs only
+        with pytest.raises(RuntimeError, match="stop"):
+            await client.complete(
+                messages=[{"role": "user", "content": "hi"}],
+                tools=self.TOOLS,
+                tool_choice=tool_choice,
+            )
+        assert sent["tools"] == self.TOOLS
+        assert sent.get("tool_choice") == expected
+
+
 class TestCompactMessages:
     """Tests for _compact_messages() — context window management."""
 
