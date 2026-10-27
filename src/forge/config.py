@@ -27,7 +27,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field
@@ -107,9 +107,11 @@ class ResourceLimits(BaseModel):
 class SandboxConfig(BaseModel):
     """Sandbox execution settings."""
 
+    engine: Literal["podman", "docker"] = "podman"
+    """Container engine used to run the app/exploit sandbox containers."""
     health_check_retries: int = 3
     default_timeout: int = 120
-    """Default timeout (seconds) for podman commands and sandbox operations."""
+    """Default timeout (seconds) for container engine commands and sandbox operations."""
     resource_limits: ResourceLimits = Field(default_factory=ResourceLimits)
 
 

@@ -24,6 +24,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from forge.sandbox.docker import DockerSandbox, DockerSandboxManager
 from forge.sandbox.models import (
     CommandResult,
     DeployResult,
@@ -37,6 +38,8 @@ from forge.sandbox.protocols import SandboxManager, SandboxSession
 __all__ = [
     "CommandResult",
     "DeployResult",
+    "DockerSandbox",
+    "DockerSandboxManager",
     "HttpResponse",
     "PodmanSandbox",
     "PodmanSandboxManager",
